@@ -139,6 +139,162 @@
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
         }
 
+        /* SIDEBARS */
+        .sidebar {
+            position: fixed;
+            top: 50%;
+            height: 70vh;
+            width: 280px;
+            max-width: 80%;
+            background: rgba(26, 22, 37, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            z-index: 2000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 20px;
+            border-radius: 20px;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.left {
+            left: 0;
+            transform: translateY(-50%) translateX(-120%);
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .sidebar.right {
+            right: 0;
+            transform: translateY(-50%) translateX(120%);
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .sidebar.active {
+            transform: translateY(-50%) translateX(0) !important;
+        }
+
+        .sidebar-tab {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-tab:hover {
+            width: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            box-shadow: 0 4px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .sidebar-tab.left {
+            left: 0;
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border-left: none;
+        }
+
+        .sidebar-tab.right {
+            right: 0;
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+            border-right: none;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            /* Newest (first in array) at top */
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            font-size: 13px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            color: var(--text-secondary);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .badge-score {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fbbf24;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        /* Bust Overlay Static State */
+        .bust-overlay.static {
+            animation: none;
+            opacity: 1;
+            transform: rotate(-5deg);
+        }
+
+        /* Real Fly-in from Deck */
+        .card.fly-in {
+            animation: flyFromDeck 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-play-state: paused;
+            /* Wait for JS to calculate position */
+            transform-origin: center center;
+            z-index: 100;
+            /* Fly above others */
+        }
+
+        @keyframes flyFromDeck {
+            0% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.2) rotate(180deg);
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+        }
+
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+
         #btnRules {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -238,6 +394,14 @@
             box-shadow:
                 0 2px 0 rgba(0, 0, 0, 0.3),
                 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Reset button state on click */
+        .btn-3d.clicked {
+            transform: translateY(0);
+            box-shadow:
+                0 6px 0 rgba(0, 0, 0, 0.3),
+                0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
         .btn-carta {
@@ -505,6 +669,8 @@
             transition: all 0.3s ease;
             position: relative;
             border: 1px solid transparent;
+            border-radius: 16px;
+            /* Round borders for everyone */
         }
 
         .player-zone.current-turn {
@@ -513,8 +679,22 @@
         }
 
         .player-zone.bust {
-            opacity: 0.5;
+            opacity: 0.8;
+            /* Slightly more visible than 0.5 */
             border-color: var(--danger);
+        }
+
+        /* Grayscale only non-bust-cause cards */
+        .player-zone.bust .card:not(.bust-cause) {
+            filter: grayscale(100%) opacity(0.6);
+            transform: scale(0.95);
+        }
+
+        .player-zone.bust .card.bust-cause {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
+            z-index: 10;
+            border: 2px solid var(--danger);
         }
 
         .player-zone.stayed {
@@ -820,8 +1000,12 @@
         .card.bust-cause {
             border: 4px solid var(--danger) !important;
             box-shadow: 0 0 30px var(--danger);
-            animation: shake 0.5s ease-in-out, glowRed 2s infinite alternate;
+            animation: glowRed 2s infinite alternate;
             z-index: 150;
+        }
+
+        .card.bust-shake {
+            animation: shake 0.5s ease-in-out;
         }
 
         @keyframes glowRed {
@@ -997,6 +1181,34 @@
                 opacity: 1;
             }
         }
+
+        /* Card Flying Animation */
+        .card.fly-in {
+            animation: flyIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+            z-index: 100;
+        }
+
+        @keyframes flyIn {
+            from {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(180deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+        }
+
+        /* Fix Z-Indices for Modals/Overlays to be above Sidebars (2000) */
+        .modal,
+        #endGameOverlay,
+        #flip7Overlay,
+        #recapOverlay {
+            z-index: 3000 !important;
+        }
+
+
 
         @keyframes shake {
 
@@ -1422,9 +1634,7 @@
 
 <body>
     <header class="header">
-        <h1 style="cursor:pointer" onclick="window.location.href = window.location.pathname;">
-            <img src="assets/Flip7 Logo.webp" alt="Flip 7" style="height:40px; vertical-align:middle;">
-        </h1>
+        <h1 id="headerTitle" style="font-size:18px; font-weight:600; margin:0;">Flip 7</h1>
         <button id="btnRules" title="Regole">
             <svg viewBox="0 0 24 24">
                 <path
@@ -1481,12 +1691,27 @@
                 Round <span id="roundNum">1</span></span>
         </div>
 
-        <div class="scoreboard glass" id="scoreboard">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3>🏆 Classifica</h3>
-                <span style="font-size:12px; color:var(--text-secondary)">Obiettivo: 200 pts</span>
+        <!-- Left Sidebar: Leaderboard -->
+        <div id="leaderboardSidebar" class="sidebar left glass">
+            <h3>🏆 Classifica</h3>
+            <span style="font-size:12px; color:var(--text-secondary); margin-bottom:15px">Obiettivo: 200 pts</span>
+            <div id="sidebarLeaderboardContent"></div>
+        </div>
+        <div id="leaderboardTab" class="sidebar-tab left glass" onclick="toggleSidebar('leaderboardSidebar')">
+            🏆
+        </div>
+
+        <!-- Right Sidebar: History -->
+        <div id="historySidebar" class="sidebar right glass">
+            <h3>📜 Storico</h3>
+            <span style="font-size:12px; color:var(--text-secondary); margin-bottom:15px">Cronologia partite</span>
+            <div id="sidebarHistoryContent" class="history-list">
+                <div style="text-align:center; padding:20px; color:var(--text-secondary); font-style:italic">Nessuna
+                    azione ancora...</div>
             </div>
-            <div id="scoreRows"></div>
+        </div>
+        <div id="historyTab" class="sidebar-tab right glass" onclick="toggleSidebar('historySidebar')">
+            📜
         </div>
 
         <div class="deck-area"
@@ -1511,30 +1736,163 @@
     </div>
 
     <div class="modal" id="rulesModal">
-        <div class="modal-content glass">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3>📜 Regole di Gioco</h3>
+        <div class="modal-content glass"
+            style="max-width: 600px; max-height: 85vh; display:flex; flex-direction:column;">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-shrink:0;">
+                <h3 style="margin:0">📜 Regole di Gioco</h3>
                 <button onclick="document.getElementById('rulesModal').classList.remove('active')"
-                    style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+                    style="background:none; border:none; color:white; font-size:24px; cursor:pointer; padding:5px;">&times;</button>
             </div>
-            <div class="rules-text" style="color:var(--text); font-size:14px; line-height:1.6">
-                <p><strong>🎯 Obiettivo:</strong> Fai punti pescando carte. Se peschi un numero che hai già:
-                    <strong>BUST!</strong> (0 punti).
-                </p>
-                <p><strong>🔥 Flip 7:</strong> Se ottieni 7 numeri diversi, vinci +15 punti bonus e il round finisce
-                    subito!</p>
-                <p><strong>Carte Speciali:</strong></p>
-                <ul style="padding-left:20px; list-style-position:inside">
-                    <li>❄️ <strong>Freeze:</strong> Congela un avversario (non può più pescare).</li>
-                    <li>⚡ <strong>Flip 3:</strong> Un avversario deve pescare 3 carte di fila.</li>
-                    <li>❤️ <strong>Second Chance:</strong> Ti salva da un BUST una volta sola.</li>
-                </ul>
-                <p><strong>Punteggio:</strong> Somma numeri → Moltiplica x2 (se presente) → Aggiungi modificatori (+2,
-                    +4...).</p>
+
+            <div class="rules-tabs" style="display:flex; gap:10px; margin-bottom:15px; flex-shrink:0;">
+                <button class="tab-btn active" onclick="switchTab('tab-general')">Generale</button>
+                <button class="tab-btn" onclick="switchTab('tab-cards')">Carte</button>
+                <button class="tab-btn" onclick="switchTab('tab-actions')">Azioni</button>
             </div>
-            <button class="btn" style="width:100%; margin:20px 0 0 0;"
+
+            <div class="rules-body" style="overflow-y:auto; padding-right:5px; flex-grow:1;">
+                <!-- GENERAL TAB -->
+                <div id="tab-general" class="tab-content active">
+                    <p><strong>🎯 Obiettivo:</strong> Fai punti sommando le carte numero. Vince chi ha più punti quando
+                        qualcuno raggiunge 200.</p>
+                    <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin:10px 0;">
+                        <strong>⚠️ BUST!</strong>
+                        <p style="font-size:13px; margin-top:5px; opacity:0.8;">Se peschi un numero che hai già in mano,
+                            perdi tutti i punti del round!</p>
+                    </div>
+                    <div style="display:flex; gap:10px; margin:15px 0; align-items:center;">
+                        <span style="font-size:24px;">🔥</span>
+                        <div>
+                            <strong>FLIP 7 BONUS</strong>
+                            <p style="font-size:13px; opacity:0.8;">Ottieni 7 numeri UNICI per finire subito il round e
+                                vincere +15 punti extra!</p>
+                        </div>
+                    </div>
+                    <p><strong>Struttura Round:</strong></p>
+                    <ol style="padding-left:20px; font-size:13px; line-height:1.6; opacity:0.9;">
+                        <li>Il Mazziere distribuisce 1 carta a testa.</li>
+                        <li>Se esce un'Azione, si risolve SUBITO.</li>
+                        <li>Al tuo turno scegli: <strong>Hit</strong> (pesca) o <strong>Stay</strong> (fermati).</li>
+                        <li>Il mazzo NON viene mescolato a fine round! Contare le carte è strategia.</li>
+                    </ol>
+                </div>
+
+                <!-- CARDS TAB -->
+                <div id="tab-cards" class="tab-content">
+                    <div class="rules-section">
+                        <h4>Numeri (0-12)</h4>
+                        <div style="display:flex; gap:10px; margin:10px 0;">
+                            <div class="card num-7" style="transform:none; width:40px; height:56px;"><span
+                                    class="card-value">7</span></div>
+                            <div class="card num-3" style="transform:none; width:40px; height:56px;"><span
+                                    class="card-value">3</span></div>
+                            <div class="card num-0" style="transform:none; width:40px; height:56px;"><span
+                                    class="card-value">0</span></div>
+                        </div>
+                        <p style="font-size:13px;">Più alto è il numero, più copie ci sono nel mazzo! (Dodici 12, undici
+                            11... uno 1, uno 0).</p>
+                    </div>
+
+                    <div class="rules-section">
+                        <h4>Modificatori</h4>
+                        <div style="display:flex; gap:10px; margin:10px 0;">
+                            <div class="card modifier" style="transform:none; width:40px; height:56px;"><span
+                                    class="card-value" style="font-size:14px">+5</span></div>
+                            <div class="card modifier" style="transform:none; width:40px; height:56px;"><span
+                                    class="card-value" style="font-size:14px">x2</span></div>
+                        </div>
+                        <p style="font-size:13px;"><strong>+Punti:</strong> Si aggiungono alla
+                            somma.<br><strong>x2:</strong> Raddoppia la somma dei soli NUMERI.</p>
+                    </div>
+                </div>
+
+                <!-- ACTIONS TAB -->
+                <div id="tab-actions" class="tab-content">
+                    <div class="action-rule"
+                        style="margin-bottom:15px; border-left:3px solid #38bdf8; padding-left:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="card action" style="transform:none; width:30px; height:42px;"><span
+                                    class="card-value" style="font-size:12px">❄️</span></div>
+                            <strong>Freeze</strong>
+                        </div>
+                        <p style="font-size:13px; opacity:0.8;">Congela un giocatore. Diventa "Stay" forzato e non può
+                            più pescare.</p>
+                    </div>
+
+                    <div class="action-rule"
+                        style="margin-bottom:15px; border-left:3px solid #f59e0b; padding-left:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="card action" style="transform:none; width:30px; height:42px;"><span
+                                    class="card-value" style="font-size:12px">⚡</span></div>
+                            <strong>Flip 3</strong>
+                        </div>
+                        <p style="font-size:13px; opacity:0.8;">Bersaglia un giocatore. Deve pescare 3 carte di fila! Se
+                            esce un'altra azione nel mentre, si risolve DOPO.</p>
+                    </div>
+
+                    <div class="action-rule" style="border-left:3px solid #f43f5e; padding-left:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="card action" style="transform:none; width:30px; height:42px;"><span
+                                    class="card-value" style="font-size:12px">❤️</span></div>
+                            <strong>Second Chance</strong>
+                        </div>
+                        <p style="font-size:13px; opacity:0.8;">Salva da un BUST una volta. Se ne peschi una seconda,
+                            devi regalarla!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" style="width:100%; margin-top:10px;"
                 onclick="document.getElementById('rulesModal').classList.remove('active')">Ho capito!</button>
         </div>
+        <style>
+            .rules-tabs .tab-btn {
+                flex: 1;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                padding: 10px;
+                color: rgba(255, 255, 255, 0.6);
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.2s;
+            }
+
+            .rules-tabs .tab-btn.active {
+                background: var(--primary);
+                color: white;
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            }
+
+            .tab-content {
+                display: none;
+                animation: fadeIn 0.3s;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(5px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+        <script>
+            function switchTab(id) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                event.target.classList.add('active');
+            }
+        </script>
     </div>
 
     <div class="modal" id="targetModal">
@@ -1608,6 +1966,7 @@
         function fireConfetti(type = 'default') {
             if (typeof confetti === 'undefined') return;
 
+            // Only fire for specific types if I am involved (checked at call site)
             if (type === 'flip7') {
                 // Rainbow explosion for Flip 7!
                 const duration = 3000;
@@ -1636,9 +1995,47 @@
         }
 
         let peer = null, conns = [], isHost = false, myId = '', myName = '', roomId = '',
-            state = { phase: 'lobby', round: 1, deck: [], players: [], dealer: 0, turn: 0, last: null, flip3: 0, pending: null },
+            state = {
+                phase: 'lobby',
+                round: 1,
+                deck: [],
+                players: [],
+                discards: [],
+                dealer: 0,
+                turn: 0,
+                last: null,
+                pending: null,
+                history: [],
+                // New Logic States
+                dealingPhase: false,
+                dealIndex: 0,
+                turnOrder: [],
+                flip3Queue: []
+            },
             // Local state to track rendered cards and avoid re-animations
-            localPlayerCardCounts = {};
+            localPlayerCardCounts = {},
+            localAnimatingCards = {};
+
+        function toggleSidebar(id) {
+            const el = document.getElementById(id);
+            // Close others
+            document.querySelectorAll('.sidebar').forEach(s => { if (s.id !== id) s.classList.remove('active'); });
+            el.classList.toggle('active');
+        }
+
+        // Close sidebars on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sidebar') && !e.target.closest('.sidebar-tab')) {
+                document.querySelectorAll('.sidebar.active').forEach(s => s.classList.remove('active'));
+            }
+        });
+
+        function addToHistory(text, type = 'normal') {
+            if (!isHost) return; // Only host manages history state
+            state.history.unshift({ t: text, type: type, time: Date.now() });
+            if (state.history.length > 15) state.history.pop(); // Keep last 15
+            sync(); updateGame();
+        }
 
         function initPeer(id) {
             return new Promise((res, rej) => {
@@ -1661,6 +2058,7 @@
                 else updateGame();
             }
             else if (d.t === 'act' && isHost) handleAct(c.peer, d.a, d.tgt);
+            else if (d.t === 'splash') showCardSplash(d.a, d.who);
             else if (d.t === 'start') startGame();
             else if (d.t === 'restart') {
                 // Client handles restart from host
@@ -1725,10 +2123,18 @@
             if (isHost && state.players.length >= 2) qs('#btnStartGame').style.display = 'block';
         }
 
-        qs('#btnStartGame').onclick = () => { if (isHost) { bc({ t: 'start' }); startGame(); } };
+        qs('#btnStartGame').onclick = function () {
+            if (this.disabled) return;
+            this.disabled = true; // Prevent double click
+            if (isHost) { bc({ t: 'start' }); startGame(); }
+        };
 
         function startGame() {
-            state.phase = 'game'; state.deck = createDeck(); state.discards = []; state.round = 1; state.dealer = 0;
+            state.phase = 'game';
+            state.deck = createDeck(); // First game always new deck
+            state.discards = [];
+            state.round = 1;
+            state.dealer = 0;
             resetRound(); qs('#lobby').style.display = 'none'; qs('#gameContainer').classList.add('active');
             dealInit();
         }
@@ -1744,6 +2150,11 @@
             state.round = 1;
             state.dealer = 0;
             state.players.forEach(p => { p.tot = 0; }); // Reset total scores
+
+            // For restart, we DO reset the deck completely
+            state.deck = createDeck();
+            state.discards = [];
+
             resetRound();
 
             // Hide all overlays
@@ -1764,29 +2175,161 @@
                 p.cards = []; p.mods = []; p.nums = new Set(); p.pts = 0;
                 p.st = 'active'; p.sc = false; p.frozen = false; p.flip3Active = false;
             });
-            state.last = null; state.pending = null; state.flip3 = 0;
+            state.last = null; state.pending = null;
+            state.dealingPhase = false; state.flip3Queue = [];
             localPlayerCardCounts = {}; // Reset local animation tracking
             qs('body').classList.remove('animation-blocked'); // Ensure UI is unlocked
         }
 
         function dealInit() {
+            // Build Turn Order: Dealer+1 ... End, then 0 ... Dealer
+            state.turnOrder = [];
             for (let i = 0; i < state.players.length; i++) {
-                const idx = (state.dealer + 1 + i) % state.players.length;
-                if (state.players[idx].st === 'active') drawCard(idx);
+                state.turnOrder.push((state.dealer + 1 + i) % state.players.length);
             }
-            state.turn = (state.dealer + 1) % state.players.length;
-            sync(); updateGame();
+            state.dealingPhase = true;
+            state.dealIndex = 0;
 
-            // Handle pending action from initial deal
-            if (state.pending) {
-                const myIdx = state.players.findIndex(p => p.id === myId);
-                if (myIdx === state.pending.from) showTgt();
-            }
+            dealLoop();
         }
 
+        function dealLoop() {
+            if (!state.dealingPhase) return;
+            // Block if animation is active
+            if (qs('body').classList.contains('animation-blocked')) {
+                setTimeout(dealLoop, 200);
+                return;
+            }
+            if (state.dealIndex >= state.players.length) {
+                // Done Dealing
+                state.dealingPhase = false;
+                // Find first ACTIVE player to start turn (skip frozen/stayed)
+                let startTurn = (state.dealer + 1) % state.players.length;
+                let attempts = 0;
+                while (state.players[startTurn].st !== 'active' && attempts < state.players.length) {
+                    startTurn = (startTurn + 1) % state.players.length;
+                    attempts++;
+                }
+                state.turn = startTurn;
+
+                showToast("Inizia il round!");
+                sync(); updateGame();
+                return;
+            }
+
+            const pIdx = state.turnOrder[state.dealIndex];
+            const p = state.players[pIdx];
+
+            // Deal card
+            if (p.st === 'active') {
+                drawCard(pIdx);
+                // Checks if Action triggered Pause
+                if (state.pending) {
+                    // Paused! Wait for handleAct/resAct to call dealLoop again
+                    // But we increment dealIndex NOW so next resume moves on?
+                    // NO. If we resume, we want to move to next player.
+                    state.dealIndex++;
+                    // Don't call recursive dealLoop here. Processing action.
+                    if (isHost) {
+                        const delay = (state.last && state.last.type === 'action') ? 2200 : 0;
+                        setTimeout(showTgt, delay);
+                    }
+                    return;
+                }
+            }
+
+            state.dealIndex++;
+            setTimeout(dealLoop, 600); // Delay between deals
+        }
+
+        function showCardSplash(type, who = null) {
+            // BLOCK UI FOR EVERYONE
+            qs('body').classList.add('animation-blocked');
+
+            const overlay = document.createElement('div');
+            overlay.className = 'action-splash';
+
+            let html = `<div class="card action" style="transform:scale(2)"><span class="card-value">${type.toUpperCase()}</span></div>`;
+            if (who && who !== myName) {
+                const prettyNames = { 'freeze': 'Freeze', 'flip3': 'Flip 3', 'second_chance': 'Second Chance' };
+                html += `<div style="color:white; font-size:24px; margin-top:40px; text-shadow:0 0 10px black; font-weight:bold; animation:fadeIn 0.5s 0.5s both;">${who} ha pescato ${prettyNames[type] || type}!</div>`;
+            }
+            overlay.innerHTML = html;
+
+            document.body.appendChild(overlay);
+
+            // Animation styles for splash
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.background = 'rgba(0,0,0,0.6)';
+            overlay.style.zIndex = '5000';
+            overlay.style.backdropFilter = 'blur(5px)';
+            overlay.style.animation = 'fadeIn 0.3s forwards';
+
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.remove();
+                    qs('body').classList.remove('animation-blocked');
+                }, 300);
+            }, 2000); // 2 seconds block
+        }
+
+        // Helper for Buttons
+        function resetButton(btn) {
+            btn.classList.add('clicked');
+            setTimeout(() => btn.classList.remove('clicked'), 200);
+        }
+
+        let lastClickTime = 0;
+        qs('#btnHit').onclick = function () {
+            if (state.dealingPhase) { showToast("Attendi la distribuzione..."); return; }
+            if (Date.now() - lastClickTime < 1000) return; // Rate Limit 1s
+            lastClickTime = Date.now();
+            resetButton(this);
+            isHost ? handleAct(myId, 'hit') : sendHost({ t: 'act', a: 'hit' });
+        };
+        qs('#btnStay').onclick = function () {
+            if (state.dealingPhase) { showToast("Attendi la distribuzione..."); return; }
+            if (Date.now() - lastClickTime < 1000) return; // Rate Limit 1s
+            lastClickTime = Date.now();
+            resetButton(this);
+            isHost ? handleAct(myId, 'stay') : sendHost({ t: 'act', a: 'stay' });
+        };
+
+        function renderCard(c, isNew = false, p = null) {
+            let src = '';
+            // Basic optimization for images
+            const path = 'assets/cards/';
+            if (c.type === 'number') src = `${path}number_${c.value}.webp`;
+            else if (c.type === 'modifier') src = `${path}modifier_${c.value}.webp`;
+            else if (c.type === 'action') src = `${path}action_${c.value}.webp`;
+
+            const bustClass = c.isBustCause ? 'bust-cause' : '';
+            // Only add fly-in if explicitly new
+            const newClass = isNew ? 'fly-in' : '';
+
+            let extra = '';
+            // Shake logic: only first 600ms of bust
+            if (c.isBustCause && p && p.bustTime && Date.now() - p.bustTime < 600) extra += ' bust-shake';
+
+            // Burn logic: if player is burning SC
+            if (p && p.scBurn) {
+                if (c.value === 'second_chance' || c.isBustCause) extra += ' burning';
+            }
+
+            return `<img src="${src}" class="card ${c.type} ${bustClass} ${newClass}${extra}" alt="${c.value}">`;
+        }
         function drawCard(idx) {
             if (!state.deck.length) {
                 if (state.discards.length) {
+                    showToast("Mescolo gli scarti... 🔀");
                     state.deck = shuffle([...state.discards]);
                     state.discards = [];
                 } else {
@@ -1816,39 +2359,31 @@
                         qs('body').classList.add('shake', 'animation-blocked');
                         setTimeout(() => qs('body').classList.remove('shake'), 400);
 
-                        // Show the burn animation
+                        // Show the burn animation STATE
+                        p.scBurn = true;
                         sync(); updateGame();
 
-                        // Trigger burn animation on SC card after a moment
+                        // Trigger burn animation is handled by renderCard checking p.scBurn
+                        // Just wait for animation to complete
                         setTimeout(() => {
-                            // Find and animate SC card burning
-                            const scCard = document.querySelector('.card.action[alt*="second_chance"], .card[src*="second_chance"]');
-                            if (scCard) scCard.classList.add('burning');
-                        }, 500);
-
-                        // Complete burn sequence after animation
-                        setTimeout(() => {
-                            // Burn Sequence
-                            // Remove the SC card
+                            // Remove SC card
                             const scIdx = p.cards.findIndex(x => x.type === 'action' && x.value === 'second_chance');
                             if (scIdx > -1) p.cards.splice(scIdx, 1);
 
-                            // Remove the bust card (last added)
+                            // Remove bust card
                             const bustIdx = p.cards.indexOf(c);
                             if (bustIdx > -1) p.cards.splice(bustIdx, 1);
 
-                            p.sc = false; // Now officially gone
+                            p.sc = false;
+                            p.scBurn = false;
 
-                            // Add to discards
                             state.discards.push({ type: 'action', value: 'second_chance' }, c);
 
                             SFX.play('action');
-
-                            // Unblock UI
                             qs('body').classList.remove('animation-blocked');
 
                             sync(); updateGame();
-                        }, 2500); // Wait for burn animation to complete
+                        }, 2500);
 
                         // We return here? No, we need to sync the 'show card' state first.
                         // But we must NOT set p.st = 'bust'.
@@ -1865,15 +2400,42 @@
                             qs('body').classList.add('shake');
                             setTimeout(() => qs('body').classList.remove('shake'), 400);
                         }
+                        addToHistory(`${p.name} ha sballato con un ${c.value}! 💥`, 'bust');
                     }
                 } else {
                     p.nums.add(c.value); p.cards.push(c); p.pts = calcPts(p);
-                    if (p.nums.size >= 7) { p.st = 'flip7'; p.pts = calcPts(p); SFX.play('flip7'); fireConfetti('flip7'); qs('body').classList.add('flip7-glow'); setTimeout(() => qs('body').classList.remove('flip7-glow'), 2000); endRound(); return; }
+                    if (p.nums.size >= 7) {
+                        p.st = 'flip7'; p.pts = calcPts(p);
+                        SFX.play('flip7');
+                        // Only fire if I am this player
+                        if (p.id === myId) {
+                            fireConfetti('flip7'); // Function logic removed, add inline here or restore?
+                            // Restoring inline logic for winner only
+                            const duration = 3000;
+                            const end = Date.now() + duration;
+                            (function frame() {
+                                confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#A78BFA', '#fbbf24'] });
+                                confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#A78BFA', '#fbbf24'] });
+                                if (Date.now() < end) requestAnimationFrame(frame);
+                            })();
+                        }
+
+                        qs('body').classList.add('flip7-glow');
+                        setTimeout(() => qs('body').classList.remove('flip7-glow'), 2000);
+                        addToHistory(`${p.name} HA FATTO FLIP 7! 🔥`, 'special');
+                        endRound(); return;
+                    }
+                    if (c.type === 'number') addToHistory(`${p.name} ha pescato ${c.value}`, 'normal');
                 }
-            } else if (c.type === 'modifier') { p.mods.push(c); p.cards.push(c); p.pts = calcPts(p); }
+            } else if (c.type === 'modifier') {
+                p.mods.push(c); p.cards.push(c); p.pts = calcPts(p);
+                addToHistory(`${p.name} ha pescato modificatore ${c.value > 0 ? '+' : ''}${c.value}`, 'normal');
+            }
             else if (c.type === 'action') {
-                showCardSplash(c.value);
+                showCardSplash(c.value, p.name); // Trigger splash visually
+                if (isHost) bc({ t: 'splash', a: c.value, who: p.name }); // Broadcast to all
                 SFX.play('action');
+                addToHistory(`${p.name} ha pescato azione ${c.value.toUpperCase()}! ⚡`, 'special');
 
                 // If in Flip 3 loop, just add to hand, don't trigger effects
                 if (isFlip3) {
@@ -1884,24 +2446,31 @@
 
                 const activeCount = state.players.filter(pl => pl.st === 'active').length;
 
+                // FLIP3 QUEUE LOGIC: If we are inside a Flip 3 loop (isFlip3 is true),
+                // we must QUEUE actions (Flip3, Freeze) to resolve AFTER the cards are drawn.
+                // UNLESS it's Second Chance, which is immediate (handled above).
+                if (isFlip3) {
+                    // Check if it's an action we need to queue
+                    if (['flip3', 'freeze'].includes(c.value)) {
+                        state.flip3Queue.push({ t: c.value, from: idx, card: c });
+                        showToast(`Azione ${c.value} in coda!`);
+                        return;
+                    }
+                }
+
                 // FLIP3: Drawer draws 3 cards themselves (no targeting)
+                // RULE CHANGE: Action is played on TARGET.
                 if (c.value === 'flip3') {
                     p.cards.push(c);
-                    p.flip3Active = true;
-                    let count = 0;
-                    function flip3Loop() {
-                        if (count < 3 && p.st === 'active') {
-                            drawCard(idx, true); // isFlip3 = true
-                            count++;
-                            sync(); updateGame();
-                            setTimeout(flip3Loop, 1200);
-                        } else {
-                            p.flip3Active = false;
-                            setTimeout(() => { sync(); updateGame(); }, 1500);
-                        }
+                    // Determine Target:
+                    // If during Initial Deal or alone -> Self
+                    if (state.dealingPhase || activeCount <= 1) {
+                        startFlip3Sequence(idx, idx);
+                    } else {
+                        // Choose target
+                        state.pending = { t: 'flip3', from: idx };
                     }
-                    setTimeout(flip3Loop, 500);
-                    return; // Don't continue - async loop handles it
+                    return;
                 }
 
                 // FREEZE: Choose someone to freeze (if alone, freeze self)
@@ -1911,7 +2480,11 @@
                         // Freeze self
                         p.frozen = true;
                         p.st = 'stayed';
-                        setTimeout(() => { nextTurn(); sync(); updateGame(); }, 1500);
+                        setTimeout(() => {
+                            if (state.dealingPhase) dealLoop(); // Resume deal
+                            else { nextTurn(); sync(); updateGame(); }
+                        }, 2200);
+
                     } else {
                         // Choose target
                         state.pending = { t: 'freeze', from: idx };
@@ -1919,22 +2492,29 @@
                     return;
                 }
 
-                // SECOND CHANCE: Keep as life, donate if have one, discard if alone with one
+                // SECOND CHANCE: Keep as life, donate if have one
                 if (c.value === 'second_chance') {
                     if (p.sc) {
-                        // Already have SC
+                        // Already have SC - MUST GIVE AWAY
                         if (activeCount <= 1) {
                             // Alone - discard the new one
                             state.discards.push(c);
+                            p.cards.pop(); // Remove from hand
                         } else {
-                            // Donate to someone (turn continues)
-                            state.pending = { t: 'give_sc', from: idx };
+                            // Donate to someone
+                            state.pending = { t: 'give_sc', from: idx, card: c };
                         }
                     } else {
                         // Keep it as extra life
                         p.sc = true;
                         p.cards.push(c);
                     }
+                    // If dealing, we need to resume! 
+                    // Wait, if we set pending 'give_sc', deal pauses.
+                    // If we just kept it, we need to auto-resume deal if dealingPhase?
+                    // drawCard is synchronous usually, but dealLoop waits for it.
+                    // Actually dealLoop just calls drawCard then setTimeout.
+                    // So if NO pending set, logic continues.
                 }
             }
         }
@@ -1948,7 +2528,7 @@
                 p.frozen = false; p.flip3Active = false;
             });
             state.last = null; state.pending = null; state.flip3 = 0;
-            localPlayerCardCounts = {};
+            localPlayerCardCounts = {}; localAnimatingCards = {};
         }
 
         // Duplicate endRound removed - see startRecapSequence below
@@ -1965,8 +2545,9 @@
             return b;
         }
 
-        qs('#btnHit').onclick = () => isHost ? handleAct(myId, 'hit') : sendHost({ t: 'act', a: 'hit' });
-        qs('#btnStay').onclick = () => isHost ? handleAct(myId, 'stay') : sendHost({ t: 'act', a: 'stay' });
+        // Duplicate listeners removed
+
+
 
         function handleAct(pid, act, tgt) {
             const idx = state.players.findIndex(p => p.id === pid); if (idx === -1) return;
@@ -1974,10 +2555,15 @@
             if (act === 'hit' && idx === state.turn && p.st === 'active') {
                 SFX.play('hit');
                 drawCard(idx);
-                if (state.pending) showTgt(); else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 3000); else nextTurn(); }
+                if (state.pending) {
+                    const delay = (state.last && state.last.type === 'action') ? 2200 : 0;
+                    if (isHost) setTimeout(showTgt, delay);
+                } else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 3000); else nextTurn(); }
             } else if (act === 'stay' && idx === state.turn) {
                 SFX.play('click');
-                p.st = 'stayed'; nextTurn();
+                p.st = 'stayed';
+                addToHistory(`${p.name} si è fermato`, 'normal');
+                nextTurn();
             } else if (act === 'tgt') resAct(tgt);
             sync(); updateGame();
         }
@@ -2006,40 +2592,122 @@
             tm.classList.add('active');
         }
 
+        function startFlip3Sequence(tgtIdx, fromIdx) {
+            const tgt = state.players[tgtIdx];
+            tgt.flip3Active = true;
+            sync(); updateGame();
+
+            let count = 0;
+            function flip3Loop() {
+                if (count < 3 && tgt.st === 'active') {
+                    drawCard(tgtIdx, true);
+                    count++;
+                    sync(); updateGame();
+
+                    // Check if last card was Action (triggered 2s splash)
+                    const isAction = state.last && state.last.type === 'action';
+                    const delay = isAction ? 2600 : 1200;
+
+                    setTimeout(flip3Loop, delay);
+                } else {
+                    tgt.flip3Active = false;
+                    // Check Queue
+                    if (state.flip3Queue.length > 0) {
+                        const queued = state.flip3Queue.shift();
+                        showToast(`Risolvo azione accodata: ${queued.t}`);
+                        setTimeout(() => {
+                            if (queued.t === 'freeze') {
+                                // Who to freeze? The person who drew it (tgtIdx).
+                                // Or the person who played it? 
+                                // Rules: "If another Flip Three or Freeze card is revealed they are resolved AFTER"
+                                // The card was revealed by `tgt`. So `tgt` effectively drew it.
+                                // So `tgt` must choose a target? Or does it apply to `tgt`?
+                                // "Action cards can be played on any active player".
+                                // So `tgt` becomes the source of the action.
+                                const activeC = state.players.filter(p => p.st === 'active').length;
+                                if (activeC <= 1) {
+                                    tgt.frozen = true; tgt.st = 'stayed';
+                                    setTimeout(finishFlip3, 1000);
+                                } else {
+                                    state.pending = { t: 'freeze', from: tgtIdx, isQueue: true };
+                                    showTgt();
+                                }
+                            } else if (queued.t === 'flip3') {
+                                // Same logic, `tgt` drew it, so `tgt` must choose target.
+                                const activeC = state.players.filter(p => p.st === 'active').length;
+                                if (activeC <= 1) {
+                                    // Recursive Flip 3 on self!
+                                    startFlip3Sequence(tgtIdx, tgtIdx);
+                                } else {
+                                    state.pending = { t: 'flip3', from: tgtIdx, isQueue: true };
+                                    showTgt();
+                                }
+                            }
+                        }, 1000);
+                    } else {
+                        setTimeout(finishFlip3, 1000);
+                    }
+                }
+            }
+
+            function finishFlip3() {
+                if (state.dealingPhase) dealLoop();
+                else {
+                    // CHECK IF TURN CONTINUES FOR ATTACKER
+                    if (fromIdx === state.turn && state.players[fromIdx].st === 'active') {
+                        // Turn continues for attacker!
+                        showToast(`${state.players[fromIdx].name} continua il turno!`);
+                        sync(); updateGame();
+                    } else {
+                        nextTurn(); sync(); updateGame();
+                    }
+                }
+            }
+
+            setTimeout(flip3Loop, 1500);
+        }
+
         // New Async handling for Flip 3 animation in Host
         function resAct(tgtIdx) {
             const tgt = state.players[tgtIdx], a = state.pending.t;
-            state.pending = null; // Clear pending first
+            const isQueue = state.pending.isQueue;
+            state.pending = null; // Clear pending
 
             if (a === 'freeze') {
                 tgt.frozen = true;
                 tgt.st = 'stayed';
-                // Delay before next turn to show what happened
-                setTimeout(() => { nextTurn(); sync(); updateGame(); }, 1500);
-                return; // Don't call sync/updateGame immediately
+                if (state.dealingPhase) { setTimeout(dealLoop, 2200); sync(); updateGame(); return; }
+                if (isQueue) {
+                    // Came from queue, check queue again? 
+                    // Simplified: just return to next turn/queue check
+                    setTimeout(() => { nextTurn(); sync(); updateGame(); }, 2200);
+                } else {
+                    setTimeout(() => { nextTurn(); sync(); updateGame(); }, 2200);
+                }
             }
             else if (a === 'give_sc') {
                 tgt.sc = true;
                 tgt.cards.push({ type: 'action', value: 'second_chance' });
-                // Don't pass turn, current player continues. 
+                // If dealing, Resume
+                if (state.dealingPhase) { dealLoop(); sync(); updateGame(); return; }
+                // Don't pass turn usually, but if this was triggered during draw?
+                // Logic: Player A hit -> Drew SC (had one) -> Gives to B.
+                // Player A's turn continues? Usually "Action cards ... resolved immediately ... continue dealing".
+                // In normal play: "If you Hit...". It doesn't say receiving a card ends specific turn.
+                // But usually drawing a card ends turn unless you hit again.
+                // Actually, if I drew a card and it was SC, I effectively "Hit". 
+                // Does my turn end? "If you Hit... Hit (get dealt another card)".
+                // Only "Stay" or "Bust" ends turn? 
+                // "The Dealer offers each player in turn... Hit or Stay".
+                // So if I Hit, I get a card. Then I can Hit again? 
+                // Rules say: "If you Hit... You may Stay as long as you have a card".
+                // Implies you can keep Hitting.
+                // So after giving SC, it is still my turn? 
+                // Let's assume Yes.
             }
             else if (a === 'flip3') {
-                tgt.flip3Active = true;
-                // Async Draw Loop
-                let count = 0;
-                function drawLoop() {
-                    if (count < 3 && tgt.st === 'active') {
-                        drawCard(tgtIdx); count++;
-                        sync(); updateGame();
-                        setTimeout(drawLoop, 1200); // Wait for animation
-                    } else {
-                        tgt.flip3Active = false;
-                        // Delay before next turn to show what happened
-                        setTimeout(() => { nextTurn(); sync(); updateGame(); }, 1500);
-                    }
-                }
-                drawLoop(); // Start async loop. Next turn called after loop.
-                return; // DON'T call nextTurn here.
+                startFlip3Sequence(tgtIdx, state.turn);
+                return;
             }
             sync(); updateGame();
         }
@@ -2063,6 +2731,17 @@
 
         function endRound() {
             state.players.forEach(p => {
+                // If SC wasn't used, discard it
+                if (p.sc) {
+                    const scIdx = p.cards.findIndex(x => x.type === 'action' && x.value === 'second_chance');
+                    if (scIdx > -1) {
+                        // Move to discards
+                        state.discards.push(p.cards[scIdx]);
+                        p.cards.splice(scIdx, 1);
+                    }
+                    p.sc = false;
+                }
+
                 if (p.st !== 'bust') p.tot += p.pts;
                 state.discards.push(...p.cards);
             });
@@ -2074,20 +2753,14 @@
             }
             state.round++; state.dealer = (state.dealer + 1) % state.players.length;
 
+            // Deck Persistence: We DO NOT createDeck() here.
+            // We just trigger recap, then nextRoundCmd will call resetRound() and dealInit()
+
             // Trigger Recap
             startRecapSequence();
         }
 
-        function renderCard(c, isNew = false) {
-            let src = '';
-            if (c.type === 'number') src = `assets/cards/number_${c.value}.webp`;
-            else if (c.type === 'modifier') src = `assets/cards/modifier_${c.value}.webp`;
-            else if (c.type === 'action') src = `assets/cards/action_${c.value}.webp`;
 
-            const bustClass = c.isBustCause ? 'bust-cause' : '';
-            const newClass = isNew ? 'new' : '';
-            return `<img src="${src}" class="card ${c.type} ${bustClass} ${newClass}" alt="${c.value}">`;
-        }
 
         function renderHiddenCard() {
             return `<img src="assets/cards/back.webp" class="card back" alt="Back">`;
@@ -2106,27 +2779,26 @@
                         <div class="recap-card glass" style="width:95%; max-width:450px; padding:20px; animation: popIn 0.5s;">
                             <h2 style="text-align:center; margin-bottom:15px; color:#fbbf24; font-size:24px;">Fine Round ${state.round - 1}</h2>
                             <table class="recap-table">
-                                <thead><tr><th style="color:rgba(255,255,255,0.6)">Giocatore</th><th>Stato</th><th style="text-align:right">Punti</th></tr></thead>
+                                <thead><tr><th style="color:rgba(255,255,255,0.6)">Giocatore</th><th style="text-align:center">Round</th><th style="text-align:right">Totale</th></tr></thead>
                                 <tbody>
-                                    ${sortedRound.map(p => {
-                        const isBust = p.st === 'bust';
-                        const isFlip7 = p.st === 'flip7';
-                        const status = isBust ? '💥 BUST' : (isFlip7 ? '🔥 FLIP7' : '✅ SAFE');
-                        const rowClass = isBust ? 'bust' : (isFlip7 ? 'winner' : '');
-                        const ptsDisplay = isBust ? `<span style="text-decoration:line-through;opacity:0.5">${p.pts}</span> 0` : `+${p.pts}`;
-                        return `<tr class="recap-row ${rowClass}">
-                                            <td style="font-weight:bold">${p.name}</td>
-                                            <td>${status}</td>
-                                            <td style="text-align:right" class="recap-pts">${ptsDisplay}</td>
-                                        </tr>`;
-                    }).join('')}
+                                    ${sortedRound.map((p, i) => `
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.1); height:40px;">
+                                        <td style="display:flex; align-items:center; gap:10px;">
+                                            <span style="font-weight:bold; color:${p.st === 'bust' ? '#ef4444' : 'white'}">${p.name}</span>
+                                            ${p.st === 'bust' ? '💥' : ''} ${i === 0 && p.st !== 'bust' ? '🏆' : ''}
+                                        </td>
+                                        <td style="text-align:center; font-weight:bold; color:${p.st === 'bust' ? '#ef4444' : '#fbbf24'}">${p.pts > 0 ? '+' : ''}${p.pts}</td>
+                                        <td style="text-align:right; font-weight:bold;">${p.tot}</td>
+                                    </tr>
+                                    `).join('')}
                                 </tbody>
                             </table>
-                             <button class="btn" style="width:100%; margin-top:20px;" onclick="isHost ? nextRoundCmd() : null" ${!isHost ? 'disabled style="opacity:0.5; cursor:default"' : ''}>
-                                ${isHost ? 'Prossimo Round ➡️' : 'Attendi Host...'}
-                            </button>
-                        </div>
-                     `;
+
+                        <button class="btn" style="width:100%; margin-top:20px;" onclick="isHost ? nextRoundCmd() : null" ${!isHost ? 'disabled style="opacity:0.5; cursor:default"' : ''}>
+                            ${isHost ? 'Prossimo Round ➡️' : 'Attendi Host...'}
+                        </button>
+                        </div >
+                        `;
                     ro.innerHTML = tableHtml;
                     ro.classList.add('active');
                 }
@@ -2159,12 +2831,22 @@
                     const amIWinner = winner && winner.id === myId;
 
                     // Status message based on win/loss
+                    if (amIWinner) {
+                        const duration = 3000;
+                        const end = Date.now() + duration;
+                        (function frame() {
+                            confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#A78BFA', '#fbbf24'] });
+                            confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#A78BFA', '#fbbf24'] });
+                            if (Date.now() < end) requestAnimationFrame(frame);
+                        })();
+                    }
+
                     const statusHtml = amIWinner ? `
-                        <div style="font-size:60px; margin-bottom:10px;">👑</div>
+                        < div style = "font-size:60px; margin-bottom:10px;" >👑</div >
                         <h1 style="font-size:42px; margin:0; background:linear-gradient(135deg, #fbbf24, #f59e0b, #eab308); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 40px rgba(251, 191, 36, 0.5);">VITTORIA!</h1>
                         <p style="color:rgba(255,255,255,0.7); margin:10px 0;">Hai raggiunto ${winner.tot} punti!</p>
                     ` : `
-                        <div style="font-size:50px; margin-bottom:10px; filter:grayscale(100%);">😔</div>
+                        < div style = "font-size:50px; margin-bottom:10px; filter:grayscale(100%);" >😔</div >
                         <h1 style="font-size:36px; margin:0; color:#888;">SCONFITTA</h1>
                         <p style="color:rgba(255,255,255,0.5); margin:10px 0;">${winner.name} ha vinto la partita</p>
                     `;
@@ -2173,8 +2855,8 @@
                     // Leaderboard
                     const medals = ['🥇', '🥈', '🥉'];
                     const leaderboardHtml = `
-                        <h3 style="text-align:center; margin:0 0 15px; color:white; font-size:18px;">📊 Classifica Finale</h3>
-                        ${sortedPlayers.map((p, i) => {
+                        < h3 style = "text-align:center; margin:0 0 15px; color:white; font-size:18px;" >📊 Classifica Finale</h3 >
+                            ${sortedPlayers.map((p, i) => {
                         const isWinner = p.tot >= 200;
                         const isMe = p.id === myId;
                         return `
@@ -2191,7 +2873,8 @@
                                     <span style="font-size:20px; font-weight:700; color:${isWinner ? '#fbbf24' : '#A78BFA'};">${p.tot}</span>
                                 </div>
                             `;
-                    }).join('')}
+                    }).join('')
+                        }
                     `;
                     qs('#endGameLeaderboard').innerHTML = leaderboardHtml;
 
@@ -2226,25 +2909,42 @@
             qs('#roundNum').innerText = state.round;
             qs('#deckCount').innerText = state.deck.length;
 
+            // SIDEBAR UPDATES
+            // 1. Leaderboard
+            const sortedLeaderboard = [...state.players].sort((a, b) => b.tot - a.tot);
+            const lbHtml = sortedLeaderboard.map((p, i) => {
+                const isWinner = p.tot >= 200;
+                return `< div class="leaderboard-row ${p.id === myId ? 'me' : ''}" style = "${isWinner ? 'color:#fbbf24; font-weight:bold' : ''}" >
+                    <span>${i + 1}. ${p.name} ${p.id === myId ? '(Tu)' : ''}</span>
+                    <span>${p.tot}</span>
+                </div > `;
+            }).join('');
+            qs('#sidebarLeaderboardContent').innerHTML = lbHtml;
+
+            // 2. History
+            const historyHtml = state.history ? state.history.map(h => {
+                const isSpecial = h.type === 'special';
+                const timeStr = new Date(h.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                return `< div class="history-item" style = "${isSpecial ? 'border-color:#fbbf24; background:rgba(251,191,36,0.1)' : ''}" >
+                    <div style="font-size:10px; opacity:0.6; margin-bottom:2px;">${timeStr}</div>
+                    <span>${h.t}</span>
+                </div > `;
+            }).join('') : '';
+            qs('#sidebarHistoryContent').innerHTML = historyHtml || '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-style:italic">Nessuna azione ancora...</div>';
+
             // DYNAMIC DECK DEPTH
             const deckEl = qs('.deck');
             if (deckEl) {
-                const depth = Math.min(12, Math.ceil(state.deck.length / 4)); // 1px depth per 4 cards, max 12px
-                // Create a "stacked" look with multiple solid shadows + a final soft shadow
-                // Color: darker version of primary (#7c3aed -> #5b21b6)
+                const depth = Math.min(12, Math.ceil(state.deck.length / 4)); // 1px depth per 4 cards
                 const solidShadow = `0 ${depth}px 0 #5b21b6`;
-                const softShadow = `0 ${depth + 10}px 20px rgba(0,0,0,0.3)`;
-                deckEl.style.boxShadow = `${solidShadow}, ${softShadow}`;
+                const softShadow = `0 ${depth + 10}px 20px rgba(0, 0, 0, 0.3)`;
+                deckEl.style.boxShadow = `${solidShadow}, ${softShadow} `;
                 deckEl.style.transform = `translateY(-${depth}px)`; // Move up as it grows down to keep center relative
                 deckEl.style.transition = 'all 0.3s ease';
             }
 
-            // Last Card display removed
-
-            qs('#scoreRows').innerHTML = state.players.map((p, i) => `
-            <div class="score-row ${i === state.turn && p.st === 'active' ? 'active' : ''} ${p.st === 'bust' ? 'bust' : ''} ${['stayed', 'flip7'].includes(p.st) ? 'stayed' : ''}">
-                <span>${p.name}${p.id === myId ? ' (Tu)' : ''}</span><span><strong>${p.tot}</strong> +${p.pts}</span>
-            </div>`).join('');
+            // Remove old scoreboard updates
+            // qs('#scoreRows').innerHTML = ...
 
             // Reorder players: current player first, then others
             const myIdx = state.players.findIndex(p => p.id === myId);
@@ -2258,19 +2958,50 @@
                 const isMe = p.id === myId;
                 const isTurn = i === state.turn;
 
+                // Update Header if it's turn
+                if (isTurn) {
+                    const ht = qs('#headerTitle');
+                    if (ht) ht.innerHTML = `Turno di: <span style="color:${isMe ? '#fbbf24' : '#fff'}">${p.name}</span>`;
+                }
+
                 // Track card counts to identify new cards for animation
-                const oldCounts = localPlayerCardCounts[p.id] || { nums: 0, mods: 0 };
+                if (!localPlayerCardCounts[p.id]) localPlayerCardCounts[p.id] = { nums: 0, mods: 0 };
+                if (!localAnimatingCards[p.id]) localAnimatingCards[p.id] = { nums: {}, mods: {} };
+
                 const numCards = p.cards.filter(c => c.type === 'number');
                 const modCards = p.cards.filter(c => c.type === 'modifier' || (c.type === 'action' && c.value === 'second_chance'));
 
+                // Check for new NUM cards
+                if (numCards.length > localPlayerCardCounts[p.id].nums) {
+                    for (let k = localPlayerCardCounts[p.id].nums; k < numCards.length; k++) {
+                        localAnimatingCards[p.id].nums[k] = Date.now();
+                    }
+                }
+                // Check for new MOD cards
+                if (modCards.length > localPlayerCardCounts[p.id].mods) {
+                    for (let k = localPlayerCardCounts[p.id].mods; k < modCards.length; k++) {
+                        localAnimatingCards[p.id].mods[k] = Date.now();
+                    }
+                }
+
+                // Update counts
                 localPlayerCardCounts[p.id] = { nums: numCards.length, mods: modCards.length };
 
-                // Render with isNew flag
-                const cardsHtml = numCards.map((c, idx) => renderCard(c, idx >= oldCounts.nums)).join('');
-                const modsHtml = modCards.map((c, idx) => renderCard(c, idx >= oldCounts.mods)).join('');
+                // Render loops
+                const cardsHtml = numCards.map((c, idx) => {
+                    const animTime = localAnimatingCards[p.id].nums[idx];
+                    const isAnimating = animTime && (Date.now() - animTime < 800); // 800ms window
+                    return renderCard(c, isAnimating, p);
+                }).join('');
+
+                const modsHtml = modCards.map((c, idx) => {
+                    const animTime = localAnimatingCards[p.id].mods[idx];
+                    const isAnimating = animTime && (Date.now() - animTime < 800);
+                    return renderCard(c, isAnimating, p);
+                }).join('');
 
                 return `
-            <div class="player-zone ${isTurn && p.st === 'active' ? 'active-turn' : ''} ${p.st === 'bust' ? 'bust' : ''} ${p.frozen ? 'frozen' : ''} ${p.id === myId ? 'my-zone' : ''}" id="pzone-${i}">
+                        < div class="player-zone ${isTurn && p.st === 'active' ? 'active-turn' : ''} ${p.st === 'bust' ? 'bust' : ''} ${p.frozen ? 'frozen' : ''} ${p.id === myId ? 'my-zone' : ''}" id = "pzone-${i}" >
                 <div class="player-info">
                     <span class="p-name" data-pts="${p.pts}">${p.name} ${i === state.dealer ? '👑' : ''}</span>
                     <div class="p-badges">
@@ -2287,8 +3018,14 @@
                     ${modsHtml ? `<div class="modifiers-row">${modsHtml}</div>` : ''}
                 </div>
                 
-                ${p.st === 'bust' ? '<div class="bust-overlay">BUST!</div>' : ''}
-            </div>`
+                
+                ${p.st === 'bust' ? (
+                        Date.now() - (p.bustTime || 0) < 2000
+                            ? '<div class="bust-overlay">BUST!</div>'
+                            : ''
+                    ) : ''
+                    }
+            </div > `
             }).join('');
 
             const me = reorderedPlayers.find(p => p.id === myId);
@@ -2297,22 +3034,40 @@
             qs('#btnHit').disabled = !canAct || state.pending; qs('#btnStay').disabled = !canAct || state.pending;
             if (state.pending?.from === meIdx) showTgt();
 
-            // Trigger flying animations
+            // GEOMETRY-BASED FLY-IN ANIMATION
             requestAnimationFrame(() => {
-                document.querySelectorAll('.card.new').forEach(card => {
-                    const deckRect = qs('.deck').getBoundingClientRect();
+                const flyCards = document.querySelectorAll('.card.fly-in');
+                if (flyCards.length === 0) return;
+
+                // Find the deck element (visible in UI)
+                const deckEl = document.querySelector('.deck');
+                if (!deckEl) return;
+
+                const deckRect = deckEl.getBoundingClientRect();
+                const deckCenterX = deckRect.left + deckRect.width / 2;
+                const deckCenterY = deckRect.top + deckRect.height / 2;
+
+                flyCards.forEach(card => {
+                    // Check if we already set values to avoid resetting animation
+                    if (card.style.getPropertyValue('--tx')) return;
+
+                    // Calculate target position (current position because it's rendered in place)
                     const cardRect = card.getBoundingClientRect();
-                    // Vector from Deck Center to Card Center
-                    const tx = deckRect.left + deckRect.width / 2 - (cardRect.left + cardRect.width / 2);
-                    const ty = deckRect.top + deckRect.height / 2 - (cardRect.top + cardRect.height / 2);
+                    const cardCenterX = cardRect.left + cardRect.width / 2;
+                    const cardCenterY = cardRect.top + cardRect.height / 2;
 
-                    card.style.setProperty('--tx', `${tx}px`);
-                    card.style.setProperty('--ty', `${ty}px`);
+                    // Vector from Deck to Card
+                    // We want: Initial = Deck. Final = Card.
+                    // Transform Translate is relative to current position.
+                    // If we want it to START at Deck, we need to translate by (Deck - Card).
+                    const tx = deckCenterX - cardCenterX;
+                    const ty = deckCenterY - cardCenterY;
 
-                    // Force Reflow
-                    card.classList.remove('new');
-                    void card.offsetWidth;
-                    card.classList.add('fly-in');
+                    card.style.setProperty('--tx', `${tx} px`);
+                    card.style.setProperty('--ty', `${ty} px`);
+
+                    // Unpause animation now that variables are set
+                    card.style.animationPlayState = 'running';
                 });
             });
         }
@@ -2338,7 +3093,7 @@
             qs('#roomInfo').style.display = 'block';
             if (qs('#qrcode').innerHTML === '') updateRoomLinkInfo();
             if (!isHost) qs('.room-link').style.display = 'block';
-            qs('#playersList').innerHTML = state.players.map((p, i) => `<div class="player-item ${i === 0 ? 'host' : ''}">${p.name}${p.id === myId ? ' (Tu)' : ''} ${i === 0 ? '👑' : ''}</div>`).join('');
+            qs('#playersList').innerHTML = state.players.map((p, i) => `< div class="player-item ${i === 0 ? 'host' : ''}" > ${p.name}${p.id === myId ? ' (Tu)' : ''} ${i === 0 ? '👑' : ''}</div > `).join('');
 
             const statusMsg = isHost ? "In attesa di partecipanti..." : "In attesa che l'host avvii la partita...";
             qs('#lobbyStatusMsg').innerText = statusMsg;
@@ -2360,9 +3115,9 @@
         qs('#roomCodeInput').oninput = (e) => {
             const val = e.target.value.trim().toUpperCase();
             if (val.length > 0) {
-                const newHash = `flip7-${val}`;
+                const newHash = `flip7 - ${val} `;
                 if (location.hash !== '#' + newHash) {
-                    history.replaceState(null, null, `#${newHash}`);
+                    history.replaceState(null, null, `#${newHash} `);
                 }
                 roomId = newHash;
             } else {
@@ -2399,7 +3154,7 @@
         function preloadImages() {
             assets.forEach(name => {
                 const img = new Image();
-                img.src = `assets/cards/${name}.webp`;
+                img.src = `assets / cards / ${name}.webp`;
                 cardImages[name] = img;
             });
         }
@@ -2421,10 +3176,10 @@
             const names = { freeze: 'FREEZE!', flip3: 'FLIP THREE!', second_chance: 'SECOND CHANCE!' };
             const splash = qs('#cardSplash');
             splash.innerHTML = `
-                <div class="splash-title ${cardValue}">${names[cardValue]}</div>
-                <div class="splash-card">
-                    <img src="assets/cards/action_${cardValue}.webp" style="width:100%; height:100%; object-fit:contain; border-radius:10px;">
-                </div>
+                        < div class="splash-title ${cardValue}" > ${names[cardValue]}</div >
+                            <div class="splash-card">
+                                <img src="assets/cards/action_${cardValue}.webp" style="width:100%; height:100%; object-fit:contain; border-radius:10px;">
+                            </div>
             `;
             splash.classList.add('active');
             setTimeout(() => splash.classList.remove('active'), 2000);
