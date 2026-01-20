@@ -1090,13 +1090,13 @@
         </div>
     </div>
 
-    <div class="winner-overlay" id="winnerOverlay"
-        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(20px);">
-        <h1
-            style="font-size:48px; margin-bottom:20px; text-align:center; background:linear-gradient(135deg,#A78BFA,#C084FC); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-            👑 VITTORIA!</h1>
-        <p id="winnerName" style="font-size:24px; color:white; margin-bottom:30px;"></p>
-        <button class="btn" onclick="location.reload()">Nuova Partita</button>
+    <div id="endGameOverlay"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(20px); overflow-y:auto; padding:20px;">
+        <div id="endGameStatus" style="text-align:center; margin-bottom:20px;"></div>
+        <div id="endGameLeaderboard"
+            style="width:100%; max-width:400px; background:rgba(255,255,255,0.08); border-radius:16px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
+        </div>
+        <button class="btn" onclick="restartGame()" style="margin-top:25px;">🔄 Nuova Partita</button>
     </div>
 
     <script>
@@ -1207,6 +1207,13 @@
             }
             else if (d.t === 'act' && isHost) handleAct(c.peer, d.a, d.tgt);
             else if (d.t === 'start') startGame();
+            else if (d.t === 'restart') {
+                // Client handles restart from host
+                qs('#endGameOverlay').style.display = 'none';
+                qs('#flip7Overlay').style.display = 'none';
+                qs('#recapOverlay').classList.remove('active');
+                showToast('🎮 Nuova partita iniziata!');
+            }
         }
 
         function bc(d) { conns.forEach(c => c.send(d)); }
@@ -1271,6 +1278,32 @@
             dealInit();
         }
 
+        function restartGame() {
+            // Only host can restart
+            if (!isHost) return;
+
+            // Reset state but keep players connected
+            state.phase = 'game';
+            state.deck = createDeck();
+            state.discards = [];
+            state.round = 1;
+            state.dealer = 0;
+            state.players.forEach(p => { p.tot = 0; }); // Reset total scores
+            resetRound();
+
+            // Hide all overlays
+            qs('#endGameOverlay').style.display = 'none';
+            qs('#flip7Overlay').style.display = 'none';
+            qs('#recapOverlay').classList.remove('active');
+
+            // Broadcast restart to all players
+            bc({ t: 'restart' });
+
+            // Start new game
+            dealInit();
+            showToast('🎮 Nuova partita iniziata!');
+        }
+
         function resetRound() {
             state.players.forEach(p => { p.cards = []; p.mods = []; p.nums = new Set(); p.pts = 0; p.st = 'active'; p.sc = false; });
             state.last = null; state.pending = null; state.flip3 = 0;
@@ -1320,7 +1353,7 @@
                     }
                 } else {
                     p.nums.add(c.value); p.cards.push(c); p.pts = calcPts(p);
-                    if (p.nums.size >= 7) { p.pts += 15; p.st = 'flip7'; SFX.play('flip7'); fireConfetti('flip7'); qs('body').classList.add('flip7-glow'); setTimeout(() => qs('body').classList.remove('flip7-glow'), 2000); endRound(); return; }
+                    if (p.nums.size >= 7) { p.st = 'flip7'; p.pts = calcPts(p); SFX.play('flip7'); fireConfetti('flip7'); qs('body').classList.add('flip7-glow'); setTimeout(() => qs('body').classList.remove('flip7-glow'), 2000); endRound(); return; }
                 }
             } else if (c.type === 'modifier') { p.mods.push(c); p.pts = calcPts(p); }
             else if (c.type === 'action') {
@@ -1370,8 +1403,13 @@
         // Duplicate endRound removed - see startRecapSequence below
 
         function calcPts(p) {
+            // 1. Sum number cards only
             let b = p.cards.reduce((s, c) => s + (c.type === 'number' ? c.value : 0), 0);
+            // 2. Apply x2 multiplier
             if (p.mods.some(m => m.value === 'x2')) b *= 2;
+            // 3. Add +15 Flip7 bonus (after x2, not affected by multiplier)
+            if (p.st === 'flip7') b += 15;
+            // 4. Add modifier bonuses (+2, +4, +6, etc.)
             p.mods.forEach(m => { if (m.value.startsWith('+')) b += parseInt(m.value.slice(1)); });
             return b;
         }
@@ -1507,13 +1545,75 @@
                 ro.classList.remove('active');
             }
 
-            // Winner Overlay Sync - All players see it when state.phase === 'end'
+            // Flip7 Celebration Sync - All players see it when someone gets Flip 7!
+            const flip7Player = state.players.find(p => p.st === 'flip7');
+            const f7o = qs('#flip7Overlay');
+            if (flip7Player && f7o) {
+                if (f7o.style.display !== 'flex') {
+                    f7o.querySelector('.flip7-winner-name').innerText = flip7Player.name;
+                    f7o.style.display = 'flex';
+                    SFX.play('flip7');
+                    fireConfetti('flip7');
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => { f7o.style.display = 'none'; }, 3000);
+                }
+            }
+
+            // End Game Screen - All players see it when state.phase === 'end'
             if (state.phase === 'end') {
-                const w = state.players.find(p => p.tot >= 200);
-                if (w && qs('#winnerOverlay').style.display !== 'flex') {
-                    qs('#winnerName').innerText = `${w.name} vince con ${w.tot} pts!`;
-                    qs('#winnerOverlay').style.display = 'flex';
-                    SFX.play('win'); fireConfetti('win');
+                const ego = qs('#endGameOverlay');
+                if (ego.style.display !== 'flex') {
+                    // Find winner and sort leaderboard
+                    const winner = state.players.find(p => p.tot >= 200);
+                    const sortedPlayers = [...state.players].sort((a, b) => b.tot - a.tot);
+                    const amIWinner = winner && winner.id === myId;
+
+                    // Status message based on win/loss
+                    const statusHtml = amIWinner ? `
+                        <div style="font-size:60px; margin-bottom:10px;">👑</div>
+                        <h1 style="font-size:42px; margin:0; background:linear-gradient(135deg, #fbbf24, #f59e0b, #eab308); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 40px rgba(251, 191, 36, 0.5);">VITTORIA!</h1>
+                        <p style="color:rgba(255,255,255,0.7); margin:10px 0;">Hai raggiunto ${winner.tot} punti!</p>
+                    ` : `
+                        <div style="font-size:50px; margin-bottom:10px; filter:grayscale(100%);">😔</div>
+                        <h1 style="font-size:36px; margin:0; color:#888;">SCONFITTA</h1>
+                        <p style="color:rgba(255,255,255,0.5); margin:10px 0;">${winner.name} ha vinto la partita</p>
+                    `;
+                    qs('#endGameStatus').innerHTML = statusHtml;
+
+                    // Leaderboard
+                    const medals = ['🥇', '🥈', '🥉'];
+                    const leaderboardHtml = `
+                        <h3 style="text-align:center; margin:0 0 15px; color:white; font-size:18px;">📊 Classifica Finale</h3>
+                        ${sortedPlayers.map((p, i) => {
+                        const isWinner = p.tot >= 200;
+                        const isMe = p.id === myId;
+                        return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; margin:8px 0; border-radius:10px; 
+                                    background:${isWinner ? 'linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.2))' : 'rgba(255,255,255,0.05)'}; 
+                                    border:1px solid ${isWinner ? 'rgba(251,191,36,0.5)' : 'rgba(255,255,255,0.1)'};
+                                    ${isWinner ? 'box-shadow: 0 0 20px rgba(251,191,36,0.3);' : ''}">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span style="font-size:24px;">${medals[i] || `#${i + 1}`}</span>
+                                        <span style="font-weight:${isWinner ? '700' : '500'}; color:${isWinner ? '#fbbf24' : 'white'};">
+                                            ${p.name}${isMe ? ' (Tu)' : ''}
+                                        </span>
+                                    </div>
+                                    <span style="font-size:20px; font-weight:700; color:${isWinner ? '#fbbf24' : '#A78BFA'};">${p.tot}</span>
+                                </div>
+                            `;
+                    }).join('')}
+                    `;
+                    qs('#endGameLeaderboard').innerHTML = leaderboardHtml;
+
+                    ego.style.display = 'flex';
+
+                    // Effects only for winner
+                    if (amIWinner) {
+                        SFX.play('win');
+                        fireConfetti('win');
+                    } else {
+                        SFX.play('bust');
+                    }
                 }
                 return; // Stop further updates when game ended
             }
@@ -1704,6 +1804,15 @@
     <div id="customToast"></div>
     <div id="recapOverlay"></div>
     <div id="cardSplash"></div>
+    <div id="flip7Overlay"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:2500; align-items:center; justify-content:center; flex-direction:column; backdrop-filter:blur(20px);">
+        <div style="font-size:80px; animation: bounce 0.5s ease infinite alternate;">🎴</div>
+        <h1
+            style="font-size:56px; margin:20px 0; background:linear-gradient(135deg, #fbbf24, #f59e0b, #eab308); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow: 0 0 40px rgba(251, 191, 36, 0.5); animation: pulseGlow 0.5s ease infinite alternate;">
+            FLIP 7!</h1>
+        <p class="flip7-winner-name" style="font-size:28px; color:white; margin-bottom:10px;"></p>
+        <p style="font-size:18px; color:rgba(255,255,255,0.7);">+15 Punti Bonus! 🎉</p>
+    </div>
 </body>
 
 </html>
