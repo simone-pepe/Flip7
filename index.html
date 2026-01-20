@@ -551,29 +551,133 @@
             min-height: 96px;
             display: flex;
             flex-wrap: wrap;
+            gap: 4px;
         }
 
-        .player-modifiers {
-            min-height: 28px;
-            margin-bottom: 8px;
+        /* Modifiers Row - below numbers */
+        .modifiers-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: -20px;
+            /* Overlap slightly */
+            margin-top: 8px;
+            min-height: 40px;
+            padding-top: 5px;
         }
 
-        .modifier-small {
-            display: inline-block;
-            padding: 4px 10px;
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            color: white;
+        .modifiers-row .card {
+            transform: scale(0.85);
+            /* Slightly smaller */
+            transform-origin: top left;
+            margin-right: -25px;
+            /* Overlap effect */
+            transition: all 0.3s ease;
+        }
+
+        .modifiers-row .card:hover {
+            transform: scale(1) translateY(-10px);
+            z-index: 100 !important;
+            margin-right: 0;
+        }
+
+        /* Bust Overlay */
+        .bust-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 37, 0.85);
+            /* Slightly darker */
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--danger);
+            text-shadow: 0 0 30px rgba(244, 63, 94, 0.8);
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            margin: 2px;
+            animation: bustEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, pulseText 2s infinite;
+            z-index: 200;
+            /* Higher than cards */
+            letter-spacing: 4px;
+            transform: rotate(-5deg);
+            pointer-events: none;
+            /* Let clicks pass through if needed */
         }
 
-        .controls {
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
+        @keyframes bustEntrance {
+            from {
+                opacity: 0;
+                transform: scale(0.5) rotate(-15deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(-5deg);
+            }
         }
+
+        @keyframes pulseText {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(-5deg);
+                text-shadow: 0 0 20px var(--danger);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+                text-shadow: 0 0 50px var(--danger), 0 0 80px red;
+            }
+        }
+
+        .card.bust-cause {
+            border: 4px solid var(--danger) !important;
+            box-shadow: 0 0 30px var(--danger);
+            animation: shake 0.5s ease-in-out, glowRed 2s infinite alternate;
+            z-index: 150;
+        }
+
+        @keyframes glowRed {
+            from {
+                box-shadow: 0 0 10px var(--danger);
+            }
+
+            to {
+                box-shadow: 0 0 40px var(--danger);
+            }
+        }
+
+        /* Enhanced Badges */
+        .badge-sc {
+            background: linear-gradient(135deg, #F87171, #DC2626);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+            animation: pulseSubtle 3s infinite;
+        }
+
+        .badge-frozen {
+            background: linear-gradient(135deg, #38BDF8, #0EA5E9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+        }
+
+        @keyframes pulseSubtle {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(248, 113, 113, 0.8);
+            }
+        }
+
 
         .controls .btn {
             min-width: 140px;
@@ -1335,9 +1439,52 @@
                 }
             }
             const p = state.players[idx], c = state.deck.pop(); state.last = c;
+
+            // FLIP 3 FIX: If player is in Flip 3 loop, actions don't interrupt
+            const isFlip3 = p.flip3Active;
+
             if (c.type === 'number') {
                 if (p.nums.has(c.value)) {
-                    if (p.sc) { p.sc = false; p.cards = p.cards.filter(x => !(x.type === 'action' && x.value === 'second_chance')); }
+                    // SECOND CHANCE LOGIC
+                    if (p.sc) {
+                        // Show the card first!
+                        c.isBustCause = true; // Highlight red
+                        p.cards.push(c);
+
+                        // Consume SC flag but keep badge for a moment? 
+                        // Actually, let's keep p.sc true for a split second so badge shows, then remove.
+                        // Wait... if I keep p.sc true, next draw might trigger again? 
+                        // No, we are inside the 'bust' branch. We won't draw again immediately.
+                        // Logic:
+
+                        SFX.play('bust'); // Play sound to scare them
+                        qs('body').classList.add('shake'); setTimeout(() => qs('body').classList.remove('shake'), 400);
+
+                        // Trigger async burn
+                        setTimeout(() => {
+                            // Burn Sequence
+                            // Remove the SC card
+                            const scIdx = p.cards.findIndex(x => x.type === 'action' && x.value === 'second_chance');
+                            if (scIdx > -1) p.cards.splice(scIdx, 1);
+
+                            // Remove the bust card (last added)
+                            const bustIdx = p.cards.indexOf(c);
+                            if (bustIdx > -1) p.cards.splice(bustIdx, 1);
+
+                            p.sc = false; // Now officially gone
+
+                            // Add to discards
+                            state.discards.push({ type: 'action', value: 'second_chance' }, c);
+
+                            // SFX for Burn/Save?
+                            SFX.play('action');
+
+                            sync(); updateGame();
+                        }, 2000); // 2 seconds delay
+
+                        // We return here? No, we need to sync the 'show card' state first.
+                        // But we must NOT set p.st = 'bust'.
+                    }
                     else {
                         p.st = 'bust'; p.pts = 0; p.bustTime = Date.now();
                         SFX.play('bust');
@@ -1357,20 +1504,22 @@
                 }
             } else if (c.type === 'modifier') { p.mods.push(c); p.pts = calcPts(p); }
             else if (c.type === 'action') {
-                // Show card splash animation
                 showCardSplash(c.value);
                 SFX.play('action');
+
+                // If in Flip 3 loop, just add to hand, don't trigger effects
+                if (isFlip3) {
+                    p.cards.push(c);
+                    // If it's SC, set flag? Yes, Flip 3 could give you SC.
+                    if (c.value === 'second_chance') p.sc = true;
+                    return;
+                }
 
                 // Solo/Last Player Logic
                 const activeCount = state.players.filter(pl => pl.st === 'active').length;
                 if (activeCount <= 1) {
                     if (c.value === 'second_chance') {
-                        // Solo: If already have SC, discard. Otherwise keep it.
-                        if (p.sc) {
-                            state.discards.push(c);
-                        } else {
-                            p.sc = true; p.cards.push(c);
-                        }
+                        if (p.sc) { state.discards.push(c); } else { p.sc = true; p.cards.push(c); }
                         if (p.st === 'active') nextTurn();
                     }
                     else if (c.value === 'flip3' || c.value === 'freeze') {
@@ -1378,7 +1527,6 @@
                         resAct(idx); // Target Self immediately
                     }
                 } else {
-                    // Normal behavior
                     if (c.value === 'second_chance') {
                         if (p.sc) state.pending = { t: 'give_sc', from: idx };
                         else { p.sc = true; p.cards.push(c); }
@@ -1423,7 +1571,7 @@
             if (act === 'hit' && idx === state.turn && p.st === 'active') {
                 SFX.play('hit');
                 drawCard(idx);
-                if (state.pending) showTgt(); else if (p.st !== 'active') nextTurn();
+                if (state.pending) showTgt(); else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 2500); else nextTurn(); }
             } else if (act === 'stay' && idx === state.turn) {
                 SFX.play('click');
                 p.st = 'stayed'; nextTurn();
@@ -1506,12 +1654,10 @@
                 state.discards.push(...p.cards);
             });
             const w = state.players.filter(p => p.tot >= 200);
-            if (w.length === 1) {
+            if (w.length >= 1) { // Handle case where multiple pass 200 (though usually 1 turn at a time)
                 state.phase = 'end';
-                qs('#winnerName').innerText = `${w[0].name} vince con ${w[0].tot} pts!`;
-                qs('#winnerOverlay').style.display = 'flex';
-                SFX.play('win'); fireConfetti('win');
-                sync(); return;
+                sync(); updateGame();
+                return;
             }
             state.round++; state.dealer = (state.dealer + 1) % state.players.length;
 
@@ -1519,13 +1665,15 @@
             startRecapSequence();
         }
 
-        function renderCard(c, stacked = false, index = 1) {
+        function renderCard(c, isNew = false) {
             let src = '';
             if (c.type === 'number') src = `assets/cards/number_${c.value}.webp`;
             else if (c.type === 'modifier') src = `assets/cards/modifier_${c.value}.webp`;
             else if (c.type === 'action') src = `assets/cards/action_${c.value}.webp`;
 
-            return `<img src="${src}" class="card ${c.type} ${stacked ? 'stacked-card' : ''}" style="${stacked ? `margin-left: ${index * 20}px; z-index: ${index};` : ''}" alt="${c.value}">`;
+            const bustClass = c.isBustCause ? 'bust-cause' : '';
+            const newClass = isNew ? 'new' : '';
+            return `<img src="${src}" class="card ${c.type} ${bustClass} ${newClass}" alt="${c.value}">`;
         }
 
         function renderHiddenCard() {
@@ -1647,15 +1795,16 @@
                 const isMe = p.id === myId;
                 const isTurn = i === state.turn;
 
-                // Separate numbers and modifiers for display
-                const displayNums = p.cards.filter(c => c.type === 'number');
-                const displayMods = p.cards.filter(c => c.type === 'modifier' || (c.type === 'action' && c.value === 'second_chance'));
+                // Track card counts to identify new cards for animation
+                const oldCounts = localPlayerCardCounts[p.id] || { nums: 0, mods: 0 };
+                const numCards = p.cards.filter(c => c.type === 'number');
+                const modCards = p.cards.filter(c => c.type === 'modifier' || (c.type === 'action' && c.value === 'second_chance'));
 
-                // Render number cards (grid)
-                const cardsHtml = displayNums.map(c => renderCard(c)).join('');
+                localPlayerCardCounts[p.id] = { nums: numCards.length, mods: modCards.length };
 
-                // Render stacked modifiers
-                const modsHtml = displayMods.map((c, idx) => renderCard(c, true, idx)).join('');
+                // Render with isNew flag
+                const cardsHtml = numCards.map((c, idx) => renderCard(c, idx >= oldCounts.nums)).join('');
+                const modsHtml = modCards.map((c, idx) => renderCard(c, idx >= oldCounts.mods)).join('');
 
                 return `
             <div class="player-zone ${isTurn && p.st === 'active' ? 'active-turn' : ''} ${p.st === 'bust' ? 'bust' : ''} ${p.frozen ? 'frozen' : ''} ${p.id === myId ? 'my-zone' : ''}" id="pzone-${i}">
@@ -1669,10 +1818,10 @@
                 </div>
                 
                 <div class="cards-container">
-                    <div class="num-cards-grid">
+                    <div class="player-cards">
                         ${cardsHtml}
                     </div>
-                    ${modsHtml ? `<div class="mod-cards-stack">${modsHtml}</div>` : ''}
+                    ${modsHtml ? `<div class="modifiers-row">${modsHtml}</div>` : ''}
                 </div>
                 
                 ${p.st === 'bust' ? '<div class="bust-overlay">BUST!</div>' : ''}
@@ -1730,38 +1879,7 @@
             else qs('#btnStartGame').style.display = 'none';
         }
 
-        function renderCard(c, animate = true) {
-            const el = document.createElement('div');
-            el.className = 'card';
-            if (animate) el.classList.add('new');
 
-            // Highlight bust cause
-            if (c.isBustCause) el.classList.add('bust-card');
-
-            let imgName = '';
-            if (c.type === 'number') imgName = `number_${c.value}`;
-            else if (c.type === 'action') imgName = `action_${c.value}`;
-            else if (c.type === 'modifier') imgName = `modifier_${c.value}`;
-
-            const prettyNames = { freeze: 'Freeze', flip3: 'Flip Three', second_chance: 'Second Chance' };
-
-            let content = '';
-            let classes = '';
-            if (c.type === 'number') { classes = `num-${c.value}`; content = `<span class="card-value">${c.value}</span>`; }
-            else if (c.type === 'modifier') { classes = 'modifier'; content = `<span class="card-value">${c.value}</span>`; }
-            else {
-                classes = 'action';
-                // Updated Second Chance icon to Heart as requested
-                content = `<span class="card-value">${{ freeze: '❄️', flip3: '⚡', second_chance: '❤️' }[c.value]}</span><span class="card-label" style="font-size:9px; display:block; margin-top:4px;">${prettyNames[c.value]}</span>`;
-            }
-
-            el.className += ' ' + classes;
-            el.innerHTML = `
-            <img src="assets/cards/${imgName}.webp" class="card-img" onerror="this.style.display='none'">
-            <div class="card-content">${content}</div>
-        `;
-            return el;
-        }
 
         // Logic for Room Code
         qs('#btnShowJoin').onclick = () => {
