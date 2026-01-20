@@ -1141,18 +1141,45 @@
 
         /* Mobile Optimizations */
         @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px;
+            }
+
             .header h1 {
-                font-size: 20px;
+                font-size: 16px;
+            }
+
+            .header h1 img {
+                height: 30px;
             }
 
             .game-info {
-                flex-direction: column;
-                gap: 5px;
-                font-size: 11px;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 4px;
+                justify-content: center;
+                width: 100%;
             }
 
             .badge {
-                padding: 4px 8px;
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+
+            .deck-area {
+                margin: 10px auto;
+            }
+
+            .deck {
+                width: 60px;
+                height: 90px;
+            }
+
+            .deck-count {
+                font-size: 18px;
             }
 
             .player-zone {
@@ -1162,8 +1189,7 @@
             }
 
             .player-zone:not(.my-zone) {
-                transform: scale(0.95);
-                opacity: 0.9;
+                transform: scale(0.9);
             }
 
             .player-zone.my-zone {
@@ -1171,7 +1197,6 @@
                 width: 100%;
             }
 
-            /* Show points near name on mobile */
             .p-name::after {
                 content: " (" attr(data-pts) " pts)";
                 font-weight: bold;
@@ -1183,7 +1208,14 @@
                 display: none;
             }
 
-            /* Hide badge to avoid dup */
+            .controls {
+                padding: 10px;
+            }
+
+            .controls button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
         }
 
         /* Recap Table Styling */
@@ -1223,7 +1255,9 @@
 
 <body>
     <header class="header">
-        <h1 style="cursor:pointer" onclick="location.reload()">🎴 Flip 7</h1>
+        <h1 style="cursor:pointer" onclick="location.reload()">
+            <img src="assets/Flip7 Logo.webp" alt="Flip 7" style="height:40px; vertical-align:middle;">
+        </h1>
         <div class="game-info">
             <span class="badge" id="badgeDealer">Dealer: <strong>-</strong></span>
             <span class="badge" id="badgeTurn">Turn: <strong>-</strong></span>
@@ -1646,14 +1680,11 @@
                 showCardSplash(c.value);
                 SFX.play('action');
 
-                // If in Flip 3 loop, still add to hand but ALLOW Flip3/Freeze to be played
+                // If in Flip 3 loop, just add to hand, don't trigger targeting yet
                 if (isFlip3) {
                     p.cards.push(c);
                     if (c.value === 'second_chance') p.sc = true;
-                    // Flip3 drawn during Flip3 should still trigger targeting
-                    if (c.value === 'flip3' || c.value === 'freeze') {
-                        state.pending = { t: c.value, from: idx };
-                    }
+                    // Actions drawn during Flip3 will be resolved after loop ends
                     return;
                 }
             }
