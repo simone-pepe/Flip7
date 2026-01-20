@@ -213,6 +213,57 @@
             transform: scale(0.98);
         }
 
+        /* 3D Button Effects */
+        .btn-3d {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateY(0);
+            box-shadow:
+                0 6px 0 rgba(0, 0, 0, 0.3),
+                0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s ease;
+        }
+
+        .btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 0 rgba(0, 0, 0, 0.3),
+                0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow:
+                0 2px 0 rgba(0, 0, 0, 0.3),
+                0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-carta {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            box-shadow:
+                0 6px 0 #15803d,
+                0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-carta:active {
+            box-shadow:
+                0 2px 0 #15803d,
+                0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow:
+                0 6px 0 #b91c1c,
+                0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-stop:active {
+            box-shadow:
+                0 2px 0 #b91c1c,
+                0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .btn:disabled {
             background: rgba(255, 255, 255, 0.1);
             box-shadow: none;
@@ -1124,6 +1175,7 @@
             background: rgba(139, 92, 246, 0.1);
             z-index: 10;
             order: -1;
+            border-radius: 20px;
             /* Always first in flex container */
         }
 
@@ -1142,31 +1194,32 @@
         /* Mobile Optimizations */
         @media (max-width: 600px) {
             .header {
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px;
+                flex-direction: row;
+                gap: 6px;
+                padding: 8px 10px;
+                justify-content: space-between;
             }
 
             .header h1 {
-                font-size: 16px;
+                font-size: 0;
             }
 
             .header h1 img {
-                height: 30px;
+                height: 28px;
             }
 
             .game-info {
                 display: flex;
                 flex-direction: row;
                 flex-wrap: wrap;
-                gap: 4px;
-                justify-content: center;
-                width: 100%;
+                gap: 3px;
+                overflow: visible;
             }
 
             .badge {
-                padding: 4px 10px;
-                font-size: 10px;
+                padding: 2px 5px;
+                font-size: 8px;
+                flex-shrink: 0;
             }
 
             .deck-area {
@@ -1258,11 +1311,6 @@
         <h1 style="cursor:pointer" onclick="location.reload()">
             <img src="assets/Flip7 Logo.webp" alt="Flip 7" style="height:40px; vertical-align:middle;">
         </h1>
-        <div class="game-info">
-            <span class="badge" id="badgeDealer">Dealer: <strong>-</strong></span>
-            <span class="badge" id="badgeTurn">Turn: <strong>-</strong></span>
-            <span class="badge" id="badgeRound">Round: <strong>1</strong></span>
-        </div>
         <button id="btnRules" title="Regole">
             <svg viewBox="0 0 24 24">
                 <path
@@ -1272,7 +1320,8 @@
     </header>
 
     <div class="lobby glass" id="lobby">
-        <h2>🎴 Flip 7</h2>
+        <img src="assets/Flip7 Logo.webp" alt="Flip 7" style="height:80px; margin-bottom:15px;">
+        <h2>Benvenuto!</h2>
         <p>Sfida i tuoi amici! Il primo che arriva a 200 punti, vince! 🏆</p>
 
         <input type="text" id="nickname" placeholder="Il tuo nickname" maxlength="15">
@@ -1307,6 +1356,14 @@
     </div>
 
     <div class="game-container" id="gameContainer">
+        <!-- Game Info Badges (visible only in game) -->
+        <div class="game-info-bar glass"
+            style="display:flex; justify-content:center; gap:10px; padding:8px 15px; margin-bottom:15px; border-radius:15px;">
+            <span class="badge" id="badgeDealer">👑 <strong>-</strong></span>
+            <span class="badge" id="badgeTurn">🎯 <strong>-</strong></span>
+            <span class="badge" id="badgeRound">🔄 Round <strong>1</strong></span>
+        </div>
+
         <div class="scoreboard glass" id="scoreboard">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3>🏆 Classifica</h3>
@@ -1315,20 +1372,24 @@
             <div id="scoreRows"></div>
         </div>
 
-        <div class="deck-area">
-            <div class="deck">
-                <img src="assets/cards/back.webp" class="card-img" style="border-radius:14px; display:none;"
-                    onload="this.style.display='block'" onerror="this.style.display='none'">
-                <div class="deck-count" id="deckCount">-</div>
-                <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
+        <div class="deck-area"
+            style="display:flex; align-items:center; justify-content:center; gap:15px; margin:20px 0;">
+            <div class="deck"
+                style="width:90px; height:126px; border-radius:12px; box-shadow: 0 8px 0 #5b21b6, 0 12px 25px rgba(0,0,0,0.4); transform-style:preserve-3d; transition:all 0.3s;">
+                <img src="assets/cards/back.webp" class="card-img"
+                    style="width:100%; height:100%; border-radius:12px; object-fit:cover;">
+            </div>
+            <div class="glass" style="padding:12px 18px; border-radius:15px; text-align:center;">
+                <div style="font-size:28px; font-weight:800; color:#fbbf24;" id="deckCount">-</div>
+                <div style="font-size:10px; opacity:0.7; text-transform:uppercase; letter-spacing:1px;">Carte</div>
             </div>
         </div>
 
         <div class="players-area" id="playersArea"></div>
 
         <div class="controls glass" id="controls">
-            <button class="btn btn-hit" id="btnHit" disabled>HIT (+1)</button>
-            <button class="btn btn-stay" id="btnStay" disabled>STAY (✋)</button>
+            <button class="btn btn-3d btn-carta" id="btnHit" disabled>� Carta</button>
+            <button class="btn btn-3d btn-stop" id="btnStay" disabled>✋ Stop</button>
         </div>
     </div>
 
@@ -1680,40 +1741,67 @@
                 showCardSplash(c.value);
                 SFX.play('action');
 
-                // If in Flip 3 loop, just add to hand, don't trigger targeting yet
+                // If in Flip 3 loop, just add to hand, don't trigger effects
                 if (isFlip3) {
                     p.cards.push(c);
                     if (c.value === 'second_chance') p.sc = true;
-                    // Actions drawn during Flip3 will be resolved after loop ends
                     return;
                 }
-            }
 
-            // Solo/Last Player Logic
-            const activeCount = state.players.filter(pl => pl.st === 'active').length;
-            if (activeCount <= 1) {
-                if (c.value === 'second_chance') {
-                    if (p.sc) { state.discards.push(c); } else { p.sc = true; p.cards.push(c); }
-                    if (p.st === 'active') nextTurn();
+                const activeCount = state.players.filter(pl => pl.st === 'active').length;
+
+                // FLIP3: Drawer draws 3 cards themselves (no targeting)
+                if (c.value === 'flip3') {
+                    p.cards.push(c);
+                    p.flip3Active = true;
+                    let count = 0;
+                    function flip3Loop() {
+                        if (count < 3 && p.st === 'active') {
+                            drawCard(idx, true); // isFlip3 = true
+                            count++;
+                            sync(); updateGame();
+                            setTimeout(flip3Loop, 1200);
+                        } else {
+                            p.flip3Active = false;
+                            setTimeout(() => { sync(); updateGame(); }, 1500);
+                        }
+                    }
+                    setTimeout(flip3Loop, 500);
+                    return; // Don't continue - async loop handles it
                 }
-                else if (c.value === 'flip3' || c.value === 'freeze') {
-                    state.pending = { t: c.value, from: idx };
-                    resAct(idx); // Target Self immediately
-                }
-            } else {
-                if (c.value === 'second_chance') {
-                    // Donation Logic: If already have SC, offer to give it.
-                    // IMPORTANT: Turn does NOT pass if donating.
-                    if (p.sc) {
-                        state.pending = { t: 'give_sc', from: idx };
-                        // Do NOT call nextTurn() here. Wait for resAct.
+
+                // FREEZE: Choose someone to freeze (if alone, freeze self)
+                if (c.value === 'freeze') {
+                    p.cards.push(c);
+                    if (activeCount <= 1) {
+                        // Freeze self
+                        p.frozen = true;
+                        p.st = 'stayed';
+                        setTimeout(() => { nextTurn(); sync(); updateGame(); }, 1500);
                     } else {
+                        // Choose target
+                        state.pending = { t: 'freeze', from: idx };
+                    }
+                    return;
+                }
+
+                // SECOND CHANCE: Keep as life, donate if have one, discard if alone with one
+                if (c.value === 'second_chance') {
+                    if (p.sc) {
+                        // Already have SC
+                        if (activeCount <= 1) {
+                            // Alone - discard the new one
+                            state.discards.push(c);
+                        } else {
+                            // Donate to someone (turn continues)
+                            state.pending = { t: 'give_sc', from: idx };
+                        }
+                    } else {
+                        // Keep it as extra life
                         p.sc = true;
                         p.cards.push(c);
-                        // Standard turn logic continues (draw loop or next)
                     }
                 }
-                else state.pending = { t: c.value, from: idx };
             }
         }
 
