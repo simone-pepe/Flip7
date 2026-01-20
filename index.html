@@ -555,22 +555,23 @@
         }
 
         /* Modifiers Row - below numbers */
+        /* Modifiers Row - below numbers */
         .modifiers-row {
             display: flex;
             flex-wrap: wrap;
-            gap: -20px;
-            /* Overlap slightly */
+            gap: 2px;
+            /* Positive gap to ensure visibility */
             margin-top: 8px;
             min-height: 40px;
             padding-top: 5px;
         }
 
         .modifiers-row .card {
-            transform: scale(0.85);
-            /* Slightly smaller */
+            transform: scale(0.9);
+            /* Slightly larger */
             transform-origin: top left;
-            margin-right: -25px;
-            /* Overlap effect */
+            margin-right: -10px;
+            /* Slight overlap */
             transition: all 0.3s ease;
         }
 
@@ -1152,6 +1153,20 @@
             <!-- Last card removed -->
         </div>
 
+        <div class="deck-area">
+            <div class="deck">
+                <div class="deck-count" id="deckCount">-</div>
+                <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
+            </div>
+        </div>
+
+        <div class="deck-area">
+            <div class="deck">
+                <div class="deck-count" id="deckCount">-</div>
+                <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
+            </div>
+        </div>
+
         <div class="players-area" id="playersArea"></div>
 
         <div class="controls glass" id="controls">
@@ -1200,7 +1215,8 @@
         <div id="endGameLeaderboard"
             style="width:100%; max-width:400px; background:rgba(255,255,255,0.08); border-radius:16px; padding:20px; border:1px solid rgba(255,255,255,0.1);">
         </div>
-        <button class="btn" onclick="restartGame()" style="margin-top:25px;">🔄 Nuova Partita</button>
+        <button class="btn" id="btnRestartGame" onclick="restartGame()" style="margin-top:25px;">🔄 Nuova
+            Partita</button>
     </div>
 
     <script>
@@ -1765,6 +1781,19 @@
                     }).join('')}
                     `;
                     qs('#endGameLeaderboard').innerHTML = leaderboardHtml;
+
+                    const restartBtn = qs('#btnRestartGame');
+                    if (restartBtn) {
+                        if (!isHost) {
+                            restartBtn.innerText = "Aspettando l'host...";
+                            restartBtn.disabled = true;
+                            restartBtn.style.opacity = 0.5;
+                        } else {
+                            restartBtn.innerText = "🔄 Nuova Partita";
+                            restartBtn.disabled = false;
+                            restartBtn.style.opacity = 1;
+                        }
+                    }
 
                     ego.style.display = 'flex';
 
