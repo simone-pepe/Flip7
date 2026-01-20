@@ -581,6 +581,17 @@
             margin-right: 0;
         }
 
+        .modifiers-row {
+            position: relative;
+            z-index: 50;
+        }
+
+        .modifiers-row .card {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
         /* Bust Overlay */
         .bust-overlay {
             position: absolute;
@@ -599,7 +610,7 @@
             color: var(--danger);
             text-shadow: 0 0 30px rgba(244, 63, 94, 0.8);
             border-radius: 20px;
-            animation: bustEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, pulseText 2s infinite;
+            animation: bustEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, pulseText 1s ease-in-out 3, bustFadeOut 0.5s ease 2.5s forwards;
             z-index: 200;
             /* Higher than cards */
             letter-spacing: 4px;
@@ -631,6 +642,13 @@
             50% {
                 transform: scale(1.1) rotate(-5deg);
                 text-shadow: 0 0 50px var(--danger), 0 0 80px red;
+            }
+        }
+
+        @keyframes bustFadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
             }
         }
 
@@ -929,9 +947,7 @@
             width: 80%;
             max-width: 400px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.5s ease;
+            /* Removed opacity:0 and transform - table shows immediately */
         }
 
         .recap-card.show {
@@ -1080,12 +1096,121 @@
                 opacity: 1;
             }
         }
+
+        /* Bust Dimming */
+        .player-zone.bust .card:not(.bust-cause) {
+            filter: grayscale(100%) brightness(0.5);
+            opacity: 0.6;
+            transition: all 0.5s ease;
+        }
+
+        /* My Zone Enhanced */
+        .player-zone.my-zone {
+            transform: scale(1);
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+            z-index: 10;
+            order: -1;
+            /* Always first in flex container */
+        }
+
+        /* Compact zones for other players */
+        .player-zone:not(.my-zone) {
+            transform: scale(0.85);
+            opacity: 0.9;
+            margin: 5px auto;
+        }
+
+        .player-zone:not(.my-zone) .card {
+            width: 45px;
+            height: 63px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 5px;
+                font-size: 11px;
+            }
+
+            .badge {
+                padding: 4px 8px;
+            }
+
+            .player-zone {
+                padding: 10px;
+                width: 100%;
+                max-width: none;
+            }
+
+            .player-zone:not(.my-zone) {
+                transform: scale(0.95);
+                opacity: 0.9;
+            }
+
+            .player-zone.my-zone {
+                transform: scale(1);
+                width: 100%;
+            }
+
+            /* Show points near name on mobile */
+            .p-name::after {
+                content: " (" attr(data-pts) " pts)";
+                font-weight: bold;
+                color: #fbbf24;
+                margin-left: 5px;
+            }
+
+            .p-badges .badge-score {
+                display: none;
+            }
+
+            /* Hide badge to avoid dup */
+        }
+
+        /* Recap Table Styling */
+        .recap-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .recap-table th {
+            text-align: left;
+            padding: 10px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .recap-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .recap-row.winner {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .recap-row.bust {
+            color: var(--danger);
+        }
+
+        .recap-pts {
+            font-weight: bold;
+            font-size: 18px;
+        }
     </style>
 </head>
 
 <body>
     <header class="header">
-        <h1>🎴 Flip 7</h1>
+        <h1 style="cursor:pointer" onclick="location.reload()">🎴 Flip 7</h1>
         <div class="game-info">
             <span class="badge" id="badgeDealer">Dealer: <strong>-</strong></span>
             <span class="badge" id="badgeTurn">Turn: <strong>-</strong></span>
@@ -1128,8 +1253,8 @@
                     onclick="copyRoomLink()">📋 Copia Link</button>
             </div>
             <div class="players-list" id="playersList"></div>
-            <p style="font-size:12px; color:var(--text-secondary); margin-top:10px">In attesa che l'host avvii la
-                partita...</p>
+            <p id="lobbyStatusMsg" style="font-size:12px; color:var(--text-secondary); margin-top:10px">In attesa che
+                l'host avvii la partita...</p>
             <button class="btn" id="btnStartGame" style="display:none;">🎮 Inizia Partita</button>
         </div>
     </div>
@@ -1147,21 +1272,6 @@
             <div class="deck">
                 <img src="assets/cards/back.webp" class="card-img" style="border-radius:14px; display:none;"
                     onload="this.style.display='block'" onerror="this.style.display='none'">
-                <div class="deck-count" id="deckCount">94</div>
-                <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
-            </div>
-            <!-- Last card removed -->
-        </div>
-
-        <div class="deck-area">
-            <div class="deck">
-                <div class="deck-count" id="deckCount">-</div>
-                <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
-            </div>
-        </div>
-
-        <div class="deck-area">
-            <div class="deck">
                 <div class="deck-count" id="deckCount">-</div>
                 <div style="font-size:10px;opacity:0.7;position:relative;z-index:1">CARTE</div>
             </div>
@@ -1544,8 +1654,16 @@
                     }
                 } else {
                     if (c.value === 'second_chance') {
-                        if (p.sc) state.pending = { t: 'give_sc', from: idx };
-                        else { p.sc = true; p.cards.push(c); }
+                        // Donation Logic: If already have SC, offer to give it.
+                        // IMPORTANT: Turn does NOT pass if donating.
+                        if (p.sc) {
+                            state.pending = { t: 'give_sc', from: idx };
+                            // Do NOT call nextTurn() here. Wait for resAct.
+                        } else {
+                            p.sc = true;
+                            p.cards.push(c);
+                            // Standard turn logic continues (draw loop or next)
+                        }
                     }
                     else state.pending = { t: c.value, from: idx };
                 }
@@ -1587,7 +1705,7 @@
             if (act === 'hit' && idx === state.turn && p.st === 'active') {
                 SFX.play('hit');
                 drawCard(idx);
-                if (state.pending) showTgt(); else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 2500); else nextTurn(); }
+                if (state.pending) showTgt(); else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 3000); else nextTurn(); }
             } else if (act === 'stay' && idx === state.turn) {
                 SFX.play('click');
                 p.st = 'stayed'; nextTurn();
@@ -1625,7 +1743,11 @@
             state.pending = null; // Clear pending first
 
             if (a === 'freeze') { tgt.frozen = true; tgt.st = 'stayed'; nextTurn(); }
-            else if (a === 'give_sc') { tgt.sc = true; tgt.cards.push({ type: 'action', value: 'second_chance' }); nextTurn(); }
+            else if (a === 'give_sc') {
+                tgt.sc = true;
+                tgt.cards.push({ type: 'action', value: 'second_chance' });
+                // Don't pass turn, current player continues. 
+            }
             else if (a === 'flip3') {
                 tgt.flip3Active = true;
                 // Async Draw Loop
@@ -1652,15 +1774,14 @@
             sync(); updateGame();
         }
 
-        async function startRecapSequence() {
-            if (!isHost) return;
+        function startRecapSequence() {
             state.phase = 'recap';
-            for (let i = 0; i < state.players.length; i++) {
-                state.recap = { pIdx: i };
-                sync(); updateGame();
-                await new Promise(r => setTimeout(r, 4000));
-            }
-            state.recap = null; state.phase = 'game';
+            sync(); updateGame();
+        }
+
+        function nextRoundCmd() {
+            if (!isHost) return;
+            state.phase = 'game';
             resetRound(); dealInit();
         }
 
@@ -1701,25 +1822,41 @@
         function updateGame() {
             // Recap Overlay Logic
             const ro = qs('#recapOverlay');
-            if (state.phase === 'recap' && state.recap) {
-                const p = state.players[state.recap.pIdx];
-                if (!ro.classList.contains('active') || ro.dataset.pidx != state.recap.pIdx) {
-                    ro.dataset.pidx = state.recap.pIdx;
-                    ro.innerHTML = `
-                <div class="recap-card">
-                    <div class="recap-name">${p.name}</div>
-                    <div class="recap-stat">${p.st === 'bust' ? 'Ha sballato!' : 'Punti Round'}</div>
-                    <div class="recap-score">${p.st === 'bust' ? 'BUST' : '+' + p.pts}</div>
-                    <div class="recap-stat">Totale: ${p.tot}</div>
-                    <div class="recap-badge ${p.st === 'bust' ? 'badge-bust' : 'badge-success'}">
-                        ${p.st === 'bust' ? '💥 BUSTED' : '✅ SAFE'}
-                    </div>
-                </div>`;
+            if (state.phase === 'recap') {
+                if (!ro.classList.contains('active') || ro.getAttribute('data-round') != state.round) {
+                    ro.setAttribute('data-round', state.round);
+                    const sortedRound = [...state.players].sort((a, b) => b.pts - a.pts);
+                    const tableHtml = `
+                        <div class="recap-card glass" style="width:95%; max-width:450px; padding:20px; animation: popIn 0.5s;">
+                            <h2 style="text-align:center; margin-bottom:15px; color:#fbbf24; font-size:24px;">Fine Round ${state.round - 1}</h2>
+                            <table class="recap-table">
+                                <thead><tr><th style="color:rgba(255,255,255,0.6)">Giocatore</th><th>Stato</th><th style="text-align:right">Punti</th></tr></thead>
+                                <tbody>
+                                    ${sortedRound.map(p => {
+                        const isBust = p.st === 'bust';
+                        const isFlip7 = p.st === 'flip7';
+                        const status = isBust ? '💥 BUST' : (isFlip7 ? '🔥 FLIP7' : '✅ SAFE');
+                        const rowClass = isBust ? 'bust' : (isFlip7 ? 'winner' : '');
+                        const ptsDisplay = isBust ? `<span style="text-decoration:line-through;opacity:0.5">${p.pts}</span> 0` : `+${p.pts}`;
+                        return `<tr class="recap-row ${rowClass}">
+                                            <td style="font-weight:bold">${p.name}</td>
+                                            <td>${status}</td>
+                                            <td style="text-align:right" class="recap-pts">${ptsDisplay}</td>
+                                        </tr>`;
+                    }).join('')}
+                                </tbody>
+                            </table>
+                             <button class="btn" style="width:100%; margin-top:20px;" onclick="isHost ? nextRoundCmd() : null" ${!isHost ? 'disabled style="opacity:0.5; cursor:default"' : ''}>
+                                ${isHost ? 'Prossimo Round ➡️' : 'Attendi Host...'}
+                            </button>
+                        </div>
+                     `;
+                    ro.innerHTML = tableHtml;
                     ro.classList.add('active');
-                    requestAnimationFrame(() => requestAnimationFrame(() => qs('.recap-card').classList.add('show')));
                 }
             } else {
                 ro.classList.remove('active');
+                ro.removeAttribute('data-round');
             }
 
             // Flip7 Celebration Sync - All players see it when someone gets Flip 7!
@@ -1813,6 +1950,19 @@
             qs('#badgeRound strong').innerText = state.round;
             qs('#deckCount').innerText = state.deck.length;
 
+            // DYNAMIC DECK DEPTH
+            const deckEl = qs('.deck');
+            if (deckEl) {
+                const depth = Math.min(12, Math.ceil(state.deck.length / 4)); // 1px depth per 4 cards, max 12px
+                // Create a "stacked" look with multiple solid shadows + a final soft shadow
+                // Color: darker version of primary (#7c3aed -> #5b21b6)
+                const solidShadow = `0 ${depth}px 0 #5b21b6`;
+                const softShadow = `0 ${depth + 10}px 20px rgba(0,0,0,0.3)`;
+                deckEl.style.boxShadow = `${solidShadow}, ${softShadow}`;
+                deckEl.style.transform = `translateY(-${depth}px)`; // Move up as it grows down to keep center relative
+                deckEl.style.transition = 'all 0.3s ease';
+            }
+
             // Last Card display removed
 
             qs('#scoreRows').innerHTML = state.players.map((p, i) => `
@@ -1820,7 +1970,15 @@
                 <span>${p.name}${p.id === myId ? ' (Tu)' : ''}</span><span><strong>${p.tot}</strong> +${p.pts}</span>
             </div>`).join('');
 
-            qs('#playersArea').innerHTML = state.players.map((p, i) => {
+            // Reorder players: current player first, then others
+            const myIdx = state.players.findIndex(p => p.id === myId);
+            const reorderedPlayers = myIdx >= 0
+                ? [state.players[myIdx], ...state.players.filter((_, i) => i !== myIdx)]
+                : state.players;
+
+            qs('#playersArea').innerHTML = reorderedPlayers.map((p) => {
+                const originalIdx = state.players.findIndex(pl => pl.id === p.id);
+                const i = originalIdx;
                 const isMe = p.id === myId;
                 const isTurn = i === state.turn;
 
@@ -1838,7 +1996,7 @@
                 return `
             <div class="player-zone ${isTurn && p.st === 'active' ? 'active-turn' : ''} ${p.st === 'bust' ? 'bust' : ''} ${p.frozen ? 'frozen' : ''} ${p.id === myId ? 'my-zone' : ''}" id="pzone-${i}">
                 <div class="player-info">
-                    <span class="p-name">${p.name} ${i === state.dealer ? '👑' : ''}</span>
+                    <span class="p-name" data-pts="${p.pts}">${p.name} ${i === state.dealer ? '👑' : ''}</span>
                     <div class="p-badges">
                         ${p.sc ? '<span class="badge badge-sc">❤️ SC</span>' : ''}
                         ${p.frozen ? '<span class="badge badge-frozen">❄️</span>' : ''}
@@ -1857,10 +2015,11 @@
             </div>`
             }).join('');
 
-            const myIdx = state.players.findIndex(p => p.id === myId), me = state.players[myIdx];
-            const canAct = myIdx === state.turn && me?.st === 'active';
+            const me = reorderedPlayers.find(p => p.id === myId);
+            const meIdx = state.players.findIndex(p => p.id === myId);
+            const canAct = meIdx === state.turn && me?.st === 'active';
             qs('#btnHit').disabled = !canAct || state.pending; qs('#btnStay').disabled = !canAct || state.pending;
-            if (state.pending?.from === myIdx) showTgt();
+            if (state.pending?.from === meIdx) showTgt();
 
             // Trigger flying animations
             requestAnimationFrame(() => {
@@ -1904,6 +2063,10 @@
             if (qs('#qrcode').innerHTML === '') updateRoomLinkInfo();
             if (!isHost) qs('.room-link').style.display = 'block';
             qs('#playersList').innerHTML = state.players.map((p, i) => `<div class="player-item ${i === 0 ? 'host' : ''}">${p.name}${p.id === myId ? ' (Tu)' : ''} ${i === 0 ? '👑' : ''}</div>`).join('');
+
+            const statusMsg = isHost ? "In attesa di partecipanti..." : "In attesa che l'host avvii la partita...";
+            qs('#lobbyStatusMsg').innerText = statusMsg;
+
             if (isHost && state.players.length >= 2) qs('#btnStartGame').style.display = 'inline-block';
             else qs('#btnStartGame').style.display = 'none';
         }
