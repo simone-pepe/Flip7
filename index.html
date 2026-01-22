@@ -5555,31 +5555,35 @@
 
         // PWA INSTALL LOGIC
         let deferredPrompt;
-        const installBanner = document.getElementById('installBanner');
 
-        // Check if already installed (Standalone mode)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        // Wrap in load event to ensure HTML is parsed
+        window.addEventListener('load', () => {
+            const installBanner = document.getElementById('installBanner');
+            if (!installBanner) return;
 
-        // Hide banner if already installed
-        if (isStandalone) {
-            // Do nothing
-        } else {
-            // Android / Desktop - Capture event
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Show banner after short delay
-                setTimeout(() => installBanner.classList.add('visible'), 3000);
-            });
+            // Check if already installed (Standalone mode)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-            // iOS Detection - Show banner anyway if iOS (since no beforeinstallprompt)
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            if (isIOS) {
-                setTimeout(() => installBanner.classList.add('visible'), 3000);
+            // Hide banner if already installed
+            if (!isStandalone) {
+                // Android / Desktop - Capture event
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    // Show banner after short delay
+                    setTimeout(() => installBanner.classList.add('visible'), 3000);
+                });
+
+                // iOS Detection - Show banner anyway if iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    setTimeout(() => installBanner.classList.add('visible'), 3000);
+                }
             }
-        }
+        });
 
         function installApp() {
+            const installBanner = document.getElementById('installBanner');
             // Android / Desktop Native Prompt
             if (deferredPrompt) {
                 deferredPrompt.prompt();
