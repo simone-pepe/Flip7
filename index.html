@@ -2501,7 +2501,7 @@
     <div id="leftSidebarDisplay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000;">
         <div class="sidebar-backdrop" onclick="toggleLeftSidebar()" style="position:absolute; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px);"></div>
         <div class="sidebar-content glass" style="position:absolute; top:0; left:0; height:100%; width:80vw; max-width:300px; padding:25px; display:flex; flex-direction:column; gap:20px; animation: slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); border-radius:0 24px 24px 0; border-left:none;">
-            <div style="font-size:28px; font-weight:800; margin-bottom:10px; background:linear-gradient(135deg, #A78BFA, #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Flip 7</div>
+            <div style="font-size:28px; font-weight:800; margin-bottom:10px; background:linear-gradient(135deg, #A78BFA, #fbbf24); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Flip 7</div>
             
             <div id="menuRoomCodeArea" style="display:none; padding:15px; background:rgba(255,255,255,0.05); border-radius:12px; border:1px solid rgba(255,255,255,0.1);">
                 <div style="font-size:10px; text-transform:uppercase; color:rgba(255,255,255,0.5); letter-spacing:1px; margin-bottom:8px;">Codice Stanza</div>
@@ -3588,26 +3588,35 @@
                                 conns = conns.filter(x => x != c);
                                 // Handle Disconnect
                                 if (isHost) {
-                                    const p = state.players.find(x => x.id === c.peer);
-                                    if (p) {
-                                        p.isOffline = true;
-                                        bc({ t: 'broadcast_toast', type: 'disconnect', from: p.name });
-                                        showToast(`⚠️ ${p.name} si è disconnesso!`);
+                                    const pIndex = state.players.findIndex(x => x.id === c.peer);
+                                    if (pIndex > -1) {
+                                        const p = state.players[pIndex];
                                         
-                                        // TRIGGER AUTO-STAY if it's their turn
-                                        const pIdx = state.players.findIndex(pl => pl.id === p.id || pl.name === p.name);
-                                        if (pIdx > -1 && state.turn === pIdx && p.st === 'active') {
-                                           showToast(`Auto-Stay per disconnessione...`);
-                                           setTimeout(() => {
-                                               // SAFETY CHECK: Player might have reconnected ID might have changed
-                                               const currentP = state.players.find(x => x.name === p.name);
-                                               if (currentP && currentP.isOffline && state.turn === pIdx && currentP.st === 'active') {
-                                                   handleAct(currentP.id, 'stay');
-                                               }
-                                           }, 1000);
-                                       }
-                                        
-                                        sync(); updateGame();
+                                        // FIX: Different behavior for Lobby vs Game
+                                        if (state.phase === 'lobby') {
+                                            state.players.splice(pIndex, 1);
+                                            bc({ t: 'state', s: serState() }); // Sync removal
+                                            updateLobby();
+                                            showToast(`👋 ${p.name} ha lasciato la stanza.`);
+                                        } else {
+                                            p.isOffline = true;
+                                            bc({ t: 'broadcast_toast', type: 'disconnect', from: p.name });
+                                            showToast(`⚠️ ${p.name} si è disconnesso!`);
+                                            
+                                            // TRIGGER AUTO-STAY if it's their turn
+                                            const activePIdx = state.players.findIndex(pl => pl.id === p.id || pl.name === p.name);
+                                            if (activePIdx > -1 && state.turn === activePIdx && p.st === 'active') {
+                                               showToast(`Auto-Stay per disconnessione...`);
+                                               setTimeout(() => {
+                                                   const currentP = state.players.find(x => x.name === p.name);
+                                                   if (currentP && currentP.isOffline && state.turn === activePIdx && currentP.st === 'active') {
+                                                       handleAct(currentP.id, 'stay');
+                                                   }
+                                               }, 1000);
+                                           }
+                                            
+                                            sync(); updateGame();
+                                        }
                                     }
                                 }
                             }); 
@@ -3945,6 +3954,17 @@
                 myName = n; roomId = h;
                 try {
                     await initPeer(); myId = peer.id;
+                    
+                    // FIX: Handle "Room Not Found" specifically
+                    peer.on('error', (err) => {
+                        if (err.type === 'peer-unavailable') {
+                            showToast('❌ Stanza non trovata! Controlla il codice.');
+                        } else {
+                            // verify connection error
+                             console.error(err); 
+                        }
+                    });
+
                     const c = peer.connect(roomId, { reliable: true });
                     c.on('open', () => { 
                         conns.push(c); 
