@@ -2995,37 +2995,54 @@
 
             // ===== PREMIUM EFFECTS =====
             // Sound Effects using Howler.js (using Web Audio API synth for lightweight sounds)
+            // Sound Effects using Howler.js
             const SFX = {
                 enabled: true,
-                // Synth sounds created with Web Audio for lightweight experience
+                sounds: {
+                    // Core Gameplay
+                    hit: new Howl({ src: ['assets/sounds/hit.mp3'] }),
+                    stay: new Howl({ src: ['assets/sounds/stay.mp3'] }),
+                    bust: new Howl({ src: ['assets/sounds/bust.mp3'] }),
+                    flip7: new Howl({ src: ['assets/sounds/flip7.mp3'] }),
+                    shuffle: new Howl({ src: ['assets/sounds/shuffle.wav'] }),
+                    deal: new Howl({ src: ['assets/sounds/deal.mp3'] }), 
+
+                    // Actions
+                    freeze: new Howl({ src: ['assets/sounds/freeze.mp3'] }),
+                    flip3: new Howl({ src: ['assets/sounds/flip3.wav'] }), // User changed to wav
+                    sc_gain: new Howl({ src: ['assets/sounds/second_chance_gain.mp3'] }),
+                    sc_burn: new Howl({ src: ['assets/sounds/second_chance_burn.mp3'] }),
+                    modifier_card: new Howl({ src: ['assets/sounds/modifier_card.mp3'] }), // Renamed
+
+                    // UI & Atmosphere
+                    click: new Howl({ src: ['assets/sounds/button_click.mp3'] }),
+                    user_join: new Howl({ src: ['assets/sounds/user_join.mp3'] }), // Global
+                    start: new Howl({ src: ['assets/sounds/start_game.mp3'] }),
+                    win_match: new Howl({ src: ['assets/sounds/win_match.mp3'] }),
+                    lose_match: new Howl({ src: ['assets/sounds/lose_match.mp3'] }), // Losers
+                    round_end: new Howl({ src: ['assets/sounds/round_end.mp3'] }), // Classifica
+                    
+                    // Popups & Notifications
+                    popup_open: new Howl({ src: ['assets/sounds/popup_open.mp3'] }),
+                    popup_close: new Howl({ src: ['assets/sounds/popup_close.mp3'] }),
+                    action_required: new Howl({ src: ['assets/sounds/action_required_popup.mp3'] }), // Your turn to act
+                    disconnection: new Howl({ src: ['assets/sounds/disconnection.mp3'] }),
+                    user_reaction: new Howl({ src: ['assets/sounds/user_reaction.mp3'] }),
+
+                    // Legacy/Fallback mapping
+                    action: new Howl({ src: ['assets/sounds/hit.mp3'] }),
+                    win: new Howl({ src: ['assets/sounds/win_match.mp3'] })
+                },
                 play: function (type) {
                     if (!this.enabled) return;
                     try {
-                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-
-                        const sounds = {
-                            card: { freq: 800, type: 'sine', dur: 0.08 },
-                            hit: { freq: 600, type: 'triangle', dur: 0.1 },
-                            bust: { freq: 200, type: 'sawtooth', dur: 0.3 },
-                            win: { freq: 523, type: 'sine', dur: 0.2 },
-                            action: { freq: 1000, type: 'square', dur: 0.15 },
-                            flip7: { freq: 880, type: 'sine', dur: 0.4 },
-                            click: { freq: 1200, type: 'sine', dur: 0.05 },
-                            round: { freq: 440, type: 'triangle', dur: 0.25 }
-                        };
-
-                        const s = sounds[type] || sounds.click;
-                        osc.frequency.setValueAtTime(s.freq, ctx.currentTime);
-                        osc.type = s.type;
-                        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + s.dur);
-                        osc.start();
-                        osc.stop(ctx.currentTime + s.dur);
-                    } catch (e) { }
+                        if (this.sounds[type]) {
+                            this.sounds[type].play();
+                        } else if (this.sounds['click']) {
+                             // Fallback
+                            this.sounds['click'].play();
+                        }
+                    } catch (e) { console.error('SFX Error:', e); }
                 }
             };
 
@@ -3652,8 +3669,10 @@
                         existingP.id = c.peer; // Update Peer ID
                         existingP.isOffline = false; // Mark Online
                         
+                        
                         // Notify everyone
                         bc({ t: 'broadcast_toast', type: 'rejoin', from: d.name });
+                        bc({ t: 'sfx', id: 'user_join' }); // Join Sound
                         showToast(`👋 ${d.name} si è riconnesso!`);
                         
                         bc({ t: 'state', s: serState() }); 
@@ -3661,6 +3680,7 @@
                     } else {
                         // New Player
                         state.players.push({ id: c.peer, name: d.name, cards: [], mods: [], nums: [], pts: 0, tot: 0, st: 'active', sc: false, isOffline: false });
+                        bc({ t: 'sfx', id: 'user_join' }); // Join Sound
                         bc({ t: 'state', s: serState() }); 
                         updateLobby();
                     }
@@ -3719,6 +3739,15 @@
                 else if (d.t === 'smoke') {
                     spawnSmokeOnPlayer(d.who);
                 }
+                // FIX: Broadcast SFX
+                else if (d.t === 'sfx') {
+                    SFX.play(d.id);
+                }
+                // NEW: Match End logic for Winner/Loser sounds
+                else if (d.t === 'match_end') {
+                    if (d.winner === myId) SFX.play('win_match');
+                    else SFX.play('lose_match');
+                }
             }
 
             function bc(d) { conns.forEach(c => c.send(d)); }
@@ -3773,7 +3802,7 @@
                 const player = state.players.find(p => p.id === pId);
                 const playerName = player ? player.name : 'Giocatore';
                 showFloatingReaction(playerName, rData);
-                SFX.play('card'); // Pop sound
+                SFX.play('user_reaction'); // Pop sound
             }
 
             // Floating reaction message from the side
@@ -3804,6 +3833,7 @@
                 const isVis = p.style.display === 'grid';
                 p.style.display = isVis ? 'none' : 'grid';
                 setTimeout(() => p.style.opacity = isVis ? 0 : 1, 10);
+                SFX.play(isVis ? 'popup_close' : 'popup_open');
             };
 
             // NEW: Toggle for Recap Picker
@@ -3813,6 +3843,7 @@
                 if(!p) return;
                 const isVis = p.style.display === 'grid';
                 p.style.display = isVis ? 'none' : 'grid';
+                SFX.play(isVis ? 'popup_close' : 'popup_open');
             };
 
             function initReactions() {
@@ -3980,8 +4011,9 @@
                         c.send({ t: 'join', name: myName }); 
                         c.on('data', d => handleMsg(c, d)); 
                         
-                        // HOST DISCONNECT HANDLER
+                         // HOST DISCONNECT HANDLER
                         c.on('close', () => {
+                             SFX.play('disconnection');
                              // Block UI with Glassmorphism
                              qs('body').innerHTML = `
                              <div style="position:fixed; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at center, #1e1b2e 0%, #000 100%); z-index:9999;">
@@ -4019,6 +4051,7 @@
                 qs('#qrcode').innerHTML = '';
                 new QRCode(qs('#qrcode'), { text: url, width: 128, height: 128 });
                 updateLobby();
+                SFX.play('popup_open');
             }
 
             window.copyRoomLink = () => { navigator.clipboard.writeText(location.href); alert('Link copiato!'); };
@@ -4056,9 +4089,19 @@
 
                 // SHUFFLE ANIMATION (Visual for Everyone)
                 const deckEl = qs('.deck');
+                
+                // Start Game Sound
+                if (isHost) bc({ t: 'sfx', id: 'start' });
+                SFX.play('start');
+
                 if (deckEl) {
                     deckEl.classList.add('shuffling');
                     showToast("Mescolo le carte... 🔀");
+                    
+                    // Shuffle Sound
+                    if (isHost) bc({ t: 'sfx', id: 'shuffle' });
+                    SFX.play('shuffle');
+
                     setTimeout(() => {
                         deckEl.classList.remove('shuffling');
                         // LOGIC: Only Host triggers the deal
@@ -4416,8 +4459,9 @@
                             // Wait... if I keep p.sc true, next draw might trigger again? 
                             // No, we are inside the 'bust' branch. We won't draw again immediately.
                             // Logic:
-
-                            SFX.play('bust'); // Play sound to scare them
+                            // Move sc_burn here for immediate feedback
+                            SFX.play('sc_burn'); 
+                            if (isHost) bc({ t: 'sfx', id: 'sc_burn' });
                             qs('body').classList.add('shake', 'animation-blocked');
                             setTimeout(() => qs('body').classList.remove('shake'), 400);
 
@@ -4449,7 +4493,7 @@
 
                                 state.discards.push({ type: 'action', value: 'second_chance' }, c);
 
-                                SFX.play('action');
+                                // Sound removed from here (moved to start of block)
                                 qs('body').classList.remove('animation-blocked');
 
                                 sync(); updateGame();
@@ -4462,6 +4506,7 @@
                             p.st = 'bust'; p.pts = 0; p.bustTime = Date.now();
                             trackBust(p.id); // Stats tracking
                             SFX.play('bust');
+                            if (isHost) bc({ t: 'sfx', id: 'bust' });
 
                             // Auto Reaction Bust & Smoke (Real Smoke Effect)
                             spawnSmokeOnPlayer(p.id);
@@ -4492,6 +4537,7 @@
                             p.st = 'flip7'; p.pts = calcPts(p);
                             trackFlip7(p.id); // Stats tracking
                             SFX.play('flip7');
+                            if (isHost) bc({ t: 'sfx', id: 'flip7' });
                             // Only fire if I am this player
                             if (p.id === myId) {
                                 fireConfetti('flip7'); // Function logic removed, add inline here or restore?
@@ -4512,10 +4558,20 @@
                             addToHistory(`${p.name} HA FATTO FLIP 7! 🔥`, 'special');
                             endRound(); return;
                         }
-                        if (c.type === 'number') addToHistory(`${p.name} ha pescato ${c.value}`, 'normal');
+                        if (c.type === 'number') {
+                            if (isHost) {
+                                // User Pref: Always use 'deal' sound, even for manual hit
+                                const sound = 'deal';
+                                SFX.play(sound);
+                                bc({ t: 'sfx', id: sound });
+                            }
+                            addToHistory(`${p.name} ha pescato ${c.value}`, 'normal');
+                        }
                     }
                 } else if (c.type === 'modifier') {
                     p.mods.push(c); p.cards.push(c); p.pts = calcPts(p);
+                    SFX.play('modifier_card');
+                    if (isHost) bc({ t: 'sfx', id: 'modifier_card' });
                     addToHistory(`${p.name} ha pescato modificatore ${c.value}`, 'normal');
                 }
                 else if (c.type === 'action') {
@@ -4542,7 +4598,16 @@
                     const triggerSplash = () => {
                         showCardSplash(c.value, p.name); 
                         if (isHost) bc({ t: 'splash', a: c.value, who: p.name }); 
-                        SFX.play('action');
+                        
+                        // SFX Logic derived from card value
+                        let sfxId = 'action';
+                        if (c.value === 'freeze') sfxId = 'freeze';
+                        else if (c.value === 'flip3') sfxId = 'flip3';
+                        else if (c.value === 'second_chance') sfxId = 'sc_gain';
+
+                        SFX.play(sfxId);
+                        if (isHost) bc({ t: 'sfx', id: sfxId });
+                        
                         const actionIcons = { freeze: '❄️ Freeze', flip3: '⚡ Flip 3', second_chance: '❤️ Second Chance' };
                         addToHistory(`${p.name} ha pescato ${actionIcons[c.value] || c.value}!`, 'special');
                     };
@@ -4718,7 +4783,7 @@
                 const idx = state.players.findIndex(p => p.id === pid); if (idx === -1) return;
                 const p = state.players[idx];
                 if (act === 'hit' && idx === state.turn && p.st === 'active') {
-                    SFX.play('hit');
+                    // Sound moved to drawCard for consistency with dealLoop
                     const res = drawCard(idx);
                     if (res === 'WAIT' || res === 'END') return;
 
@@ -4727,7 +4792,8 @@
                         if (isHost) setTimeout(showTgt, delay);
                     } else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 3000); else nextTurn(); }
                 } else if (act === 'stay' && idx === state.turn) {
-                    SFX.play('click');
+                    SFX.play('stay');
+                    if (isHost) bc({ t: 'sfx', id: 'stay' });
                     p.st = 'stayed';
                     trackStay(p.id); // Stats tracking
                     addToHistory(`${p.name} si è fermato`, 'normal');
@@ -4751,6 +4817,9 @@
                     'give_sc': '❤️ A chi regali Second Chance?'
                 };
                 qs('#modalTitle').innerText = titles[state.pending.t] || `Scegli bersaglio`;
+                SFX.play('action_required'); // Local sound for me only
+                SFX.play('popup_open');
+
 
                 qs('#targetButtons').innerHTML = ''; // Clear
 
@@ -5047,9 +5116,39 @@
                 const w = state.players.filter(p => p.tot >= 200);
                 if (w.length >= 1) { // Handle case where multiple pass 200 (though usually 1 turn at a time)
                     state.phase = 'end';
+                    if (isHost) {
+                         bc({ t: 'sfx', id: 'lose_match' }); // Broadcast lose to everyone first
+                         // Then override locally for winner? 
+                         // No, better logic: 
+                         // Broadcast WIN for winner? No, winner hears WIN, others hear LOSE.
+                         // But BC sends same ID to everyone. 
+                         // We need client-side logic: on 'win_match' message, check if I am winner?
+                         // Current system is simple ID broadcast.
+                         // Let's broadcast 'win_match'. The client knows who won based on state? 
+                         // Or we broadcast generic 'match_over' and client decides?
+                         // Simple approach: Broadcast 'win_match' always. 
+                         // But user asked for 'lose_match' for everyone except winner.
+                         // Let's broadcast 'match_result'. Client checks state.
+                         // For now, let's keep 'win_match' broadcast but ADD 'lose_match' logic on client?
+                         // Actually, let's execute logic here:
+                         // Host plays 'win_match' if he is winner, else 'lose_match'.
+                         // AND broadcast... wait, simpler:
+                         // Broadcast 'win_match'. Client sees who won.
+                         // BUT user specified 'lose_match' mp3.
+                         // Let's use 'win_match' for the winner and 'lose_match' for others.
+                         // Updated Plan: broadcast special event 'match_end'.
+                         bc({ t: 'match_end', winner: w[0].id }); 
+                    }
+                    if (w[0].id === myId) SFX.play('win_match'); else SFX.play('lose_match');
+                    
                     sync(); updateGame();
                     return;
                 }
+                
+                // End of Round (Round End sound)
+                if (isHost) bc({ t: 'sfx', id: 'round_end' });
+                SFX.play('round_end');
+
                 state.round++; state.dealer = (state.dealer + 1) % state.players.length;
 
                 // Deck Persistence: We DO NOT createDeck() here.
