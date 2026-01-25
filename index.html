@@ -1181,10 +1181,6 @@
             pointer-events: none;
         }
 
-        /* Overrides if multiple statuses? 
-           We can stack them top-right, but simple absolute positioning might overlap. 
-           Let's just trust that states are mutually exclusive mostly or one overrides another. 
-        */
 
         .player-zone.bust-anim {
             animation: shake 0.4s ease-in-out both;
@@ -3000,34 +2996,34 @@
                 enabled: true,
                 sounds: {
                     // Core Gameplay
-                    hit: new Howl({ src: ['assets/sounds/hit.mp3'] }),
+                    hit: new Howl({ src: ['assets/sounds/hit.mp3'] }), 
                     stay: new Howl({ src: ['assets/sounds/stay.mp3'] }),
-                    bust: new Howl({ src: ['assets/sounds/bust.mp3'] }),
-                    flip7: new Howl({ src: ['assets/sounds/flip7.mp3'] }),
-                    shuffle: new Howl({ src: ['assets/sounds/shuffle.wav'] }),
-                    deal: new Howl({ src: ['assets/sounds/deal.mp3'] }), 
+                    bust: new Howl({ src: ['assets/sounds/bust.mp3'] }), //suono bust
+                    flip7: new Howl({ src: ['assets/sounds/flip7.mp3'] }), //suono splashscreen flip7
+                    shuffle: new Howl({ src: ['assets/sounds/shuffle.wav'] }), //non cambia
+                    deal: new Howl({ src: ['assets/sounds/deal.mp3'] }),  //non cambia
 
                     // Actions
-                    freeze: new Howl({ src: ['assets/sounds/freeze.mp3'] }),
+                    freeze: new Howl({ src: ['assets/sounds/freeze.mp3'] }), //suono splashscreen freeze
                     flip3: new Howl({ src: ['assets/sounds/flip3.wav'] }), // User changed to wav
-                    sc_gain: new Howl({ src: ['assets/sounds/second_chance_gain.mp3'] }),
-                    sc_burn: new Howl({ src: ['assets/sounds/second_chance_burn.mp3'] }),
-                    modifier_card: new Howl({ src: ['assets/sounds/modifier_card.mp3'] }), // Renamed
+                    sc_gain: new Howl({ src: ['assets/sounds/second_chance_gain.mp3'] }), //suono splashscreen second chance
+                    sc_burn: new Howl({ src: ['assets/sounds/second_chance_burn.mp3'] }), //suono second chance che brucia
+                    modifier_card: new Howl({ src: ['assets/sounds/modifier_card.mp3'] }), //suono quando si pesca carta modificatore
 
                     // UI & Atmosphere
-                    click: new Howl({ src: ['assets/sounds/button_click.mp3'] }),
+                    click: new Howl({ src: ['assets/sounds/button_click.mp3'] }), //suono click pulsanti
                     user_join: new Howl({ src: ['assets/sounds/user_join.mp3'] }), // Global
-                    start: new Howl({ src: ['assets/sounds/start_game.mp3'] }),
-                    win_match: new Howl({ src: ['assets/sounds/win_match.mp3'] }),
-                    lose_match: new Howl({ src: ['assets/sounds/lose_match.mp3'] }), // Losers
-                    round_end: new Howl({ src: ['assets/sounds/round_end.mp3'] }), // Classifica
+                    start: new Howl({ src: ['assets/sounds/start_game.mp3'] }), //suono quando si clicca start
+                    win_match: new Howl({ src: ['assets/sounds/win_match.mp3'] }), //suono quando si vince la partita
+                    lose_match: new Howl({ src: ['assets/sounds/lose_match.mp3'] }), //suono quando si perde la partita
+                    round_end: new Howl({ src: ['assets/sounds/round_end.mp3'] }), //suono classifica
                     
                     // Popups & Notifications
-                    popup_open: new Howl({ src: ['assets/sounds/popup_open.mp3'] }),
-                    popup_close: new Howl({ src: ['assets/sounds/popup_close.mp3'] }),
-                    action_required: new Howl({ src: ['assets/sounds/action_required_popup.mp3'] }), // Your turn to act
-                    disconnection: new Howl({ src: ['assets/sounds/disconnection.mp3'] }),
-                    user_reaction: new Howl({ src: ['assets/sounds/user_reaction.mp3'] }),
+                    popup_open: new Howl({ src: ['assets/sounds/popup_open.mp3'] }), //suono quando si apre un popup
+                    popup_close: new Howl({ src: ['assets/sounds/popup_close.mp3'] }), //suono quando si chiude un popup
+                    action_required: new Howl({ src: ['assets/sounds/action_required_popup.mp3'] }), //Azione popup
+                    disconnection: new Howl({ src: ['assets/sounds/disconnection.mp3'] }), //suono quando un utente si disconnette
+                    user_reaction: new Howl({ src: ['assets/sounds/user_reaction.mp3'] }), //suono quando un utente usa le emoji
 
                     // Legacy/Fallback mapping
                     action: new Howl({ src: ['assets/sounds/hit.mp3'] }),
