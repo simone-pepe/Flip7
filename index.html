@@ -2565,9 +2565,10 @@
                 <span style="font-size:20px;">🎭</span>
                 <label class="switch" style="position:relative; display:inline-block; width:50px; height:28px;">
                     <input type="checkbox" id="memeCheckbox" onchange="window.toggleMemeMode()">
-                    <span class="slider round" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px;"></span>
+                    <span class="slider round" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; transition:.4s; border-radius:34px;"></span>
                     <style>
                     .switch input {opacity: 0; width: 0; height: 0;}
+                    .slider { background-color: #ccc; }
                     .slider:before {position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;}
                     input:checked + .slider {background-color: #8B5CF6;}
                     input:checked + .slider:before {transform: translateX(22px);}
@@ -3043,6 +3044,10 @@
                     action_required: new Howl({ src: ['assets/sounds/action_required_popup.mp3'] }),
                     disconnection: new Howl({ src: ['assets/sounds/disconnection.mp3'] }),
                     user_reaction: new Howl({ src: ['assets/sounds/user_reaction.mp3'] }),
+                    
+                    // Sidebar Sounds
+                    slide_in: new Howl({ src: ['assets/sounds/slide_in.mp3'] }),
+                    slide_out: new Howl({ src: ['assets/sounds/slide_out.mp3'] }),
 
                     // Legacy/Fallback mapping
                     action: new Howl({ src: ['assets/sounds/hit.mp3'] }),
@@ -3680,15 +3685,30 @@
 
             function toggleSidebar(id) {
                 const el = document.getElementById(id);
+                const wasActive = el.classList.contains('active');
+                
                 // Close others
-                document.querySelectorAll('.sidebar').forEach(s => { if (s.id !== id) s.classList.remove('active'); });
-                el.classList.toggle('active');
+                document.querySelectorAll('.sidebar').forEach(s => { 
+                    if (s.id !== id) s.classList.remove('active'); 
+                });
+                
+                if (wasActive) {
+                    el.classList.remove('active');
+                    SFX.play('slide_out');
+                } else {
+                    el.classList.add('active');
+                    SFX.play('slide_in');
+                }
             }
 
             // Close sidebars on click outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.sidebar') && !e.target.closest('.sidebar-tab')) {
-                    document.querySelectorAll('.sidebar.active').forEach(s => s.classList.remove('active'));
+                    const activeSidebars = document.querySelectorAll('.sidebar.active');
+                    if (activeSidebars.length > 0) {
+                        SFX.play('slide_out');
+                        activeSidebars.forEach(s => s.classList.remove('active'));
+                    }
                 }
             });
 
@@ -3850,13 +3870,17 @@
                 // NEW: MEME MODE SYNC
                 else if (d.t === 'meme_mode') {
                     window.GAME_STATE.memeMode = d.val;
-                    // Update UI if in lobby
                     updateLobby();
-                    showToast(d.val ? "🎭 MEME MODE ATTIVATA!" : "Meme Mode disattivata.");
                     
-                    // Preload sound arrays if newly enabled? 
-                    // Howler logic is lazy in SFX.play, so we don't strictly need to preload instantly,
-                    // but we should ensure SFX object is ready.
+                    // Sound & Enhanced Toast
+                    new Howl({ src: ['assets/sounds/meme_mode/he he yeah boy.mp3'] }).play();
+                    
+                    if (d.val) {
+                         showBroadcastToast('meme_mode', d.from || 'Host', null); // Reuse broadcast toast if possible or just custom
+                         showToast("🎭 MEME MODE ATTIVATA! (He he yeah boy)"); 
+                    } else {
+                        showToast("Meme Mode disattivata.");
+                    }
                 }
             }
 
@@ -4182,6 +4206,7 @@
                     // STYLE for Host vs Client
                     switchContainer.style.opacity = isHost ? '1' : '0.5';
                     switchContainer.style.pointerEvents = isHost ? 'auto' : 'none';
+                    checkbox.disabled = !isHost; // Force Read-only logic
                     checkbox.checked = window.GAME_STATE.memeMode;
                     // Ensure visibility
                     switchContainer.style.display = 'flex';
@@ -6137,12 +6162,14 @@
                 const content = sidebar.querySelector('.sidebar-content');
 
                 if (sidebar.style.display === 'block') {
+                    SFX.play('slide_out');
                     content.classList.add('closing');
                     content.addEventListener('animationend', () => {
                         sidebar.style.display = 'none';
                         content.classList.remove('closing');
                     }, { once: true });
                 } else {
+                    SFX.play('slide_in');
                     sidebar.style.display = 'block';
                     // Update Room Code Area
                     const codeArea = qs('#menuRoomCodeArea');
@@ -6263,7 +6290,8 @@
                     give_sc: { icon: '❤️', msg: `${fromName} dona Second Chance a ${targetName}!`, cls: 'second-chance' },
                     // deal_resume: { icon: '🎴', msg: 'Azione risolta, riprendiamo il dealing!', cls: 'freeze' },
                     rejoin: { icon: '👋', msg: `${fromName} è tornato in partita!`, cls: 'second-chance' },
-                    disconnect: { icon: '⚠️', msg: `${fromName} disconnesso (Auto-Stay)`, cls: 'freeze' }
+                    disconnect: { icon: '⚠️', msg: `${fromName} disconnesso (Auto-Stay)`, cls: 'freeze' },
+                    meme_mode: { icon: '🎭', msg: `MEME MODE ATTIVATA DA ${fromName}!`, cls: 'flip3' }
                 };
                 const cfg = configs[type];
                 if (!cfg) return;
