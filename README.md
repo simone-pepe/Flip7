@@ -30,6 +30,8 @@ Una modalità caotica nascosta (attivabile dall'Host) che trasforma il gioco in 
 *   **Dorsi Personalizzati**: 13+ stili di carte (Cyberpunk, Retro '30s, Vaporwave, ecc.).
 *   **Statistiche**: Dashboard completa con grafici (Chart.js) a fine partita.
 *   **PWA Ready**: Installabile come app nativa su iOS e Android.
+*   **Emoji Mapping**: Integrazione di 3000+ emoji animate tramite mapping JSON e CDN (GitHub).
+
 
 ---
 
@@ -75,9 +77,12 @@ Flip7/
 │   │   └── meme_mode/       # SFX per Meme Mode
 │   └── ...
 ├── index.html               # Entry point (Logica JS inclusa)
+├── emoji_mapping.json       # Mapping programmatico emoji animate
+├── EMOJI_INVENTORY.md       # Catalogo visuale delle emoji disponibili
 ├── manifest.json            # Configurazione PWA
 ├── Flip7Rules.txt           # Regole complete
 └── README.md                # Questo file
+
 ```
 
 ---
@@ -98,7 +103,9 @@ Flip7/
 *   **Sviluppo & Adattamento**: Simone Pepe
 *   **Idea Originale**: Basato sul gioco di carte "Flip 7" di Eric Olsen.
 *   **Asset Audio**: Mixkit & Risorse Meme Community.
+*   **Animated Emojis**: [Tarikul-Islam-Anik](https://github.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis) per la splendida collezione di Fluent Emojis.
 *   **Librerie**: Vedere sezione Tecnologie.
+
 
 ---
 
