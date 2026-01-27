@@ -42,6 +42,49 @@
             --card-gradient: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
         }
 
+        /* THEMES */
+        [data-theme="cyberpunk"] {
+            --primary: #00f0ff;
+            --primary-light: #50f6ff;
+            --primary-dark: #00a0aa;
+            --accent: #ff0099;
+            --bg-gradient: linear-gradient(135deg, #050510 0%, #100515 50%, #000000 100%);
+            --glass-bg: rgba(0, 240, 255, 0.05);
+            --glass-border: rgba(0, 240, 255, 0.3);
+            --glass-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+            --text: #e0faff;
+            --text-secondary: rgba(224, 250, 255, 0.6);
+            --card-gradient: linear-gradient(145deg, rgba(0, 240, 255, 0.1), rgba(0, 0, 0, 0.4));
+        }
+
+        [data-theme="minimalist"] {
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --primary-dark: #1e40af;
+            --accent: #f43f5e;
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --text: #0f172a;
+            --text-secondary: rgba(15, 23, 42, 0.6);
+            --card-gradient: linear-gradient(145deg, #ffffff, #f8fafc);
+        }
+
+        [data-theme="velvet"] {
+            --primary: #be123c;
+            --primary-light: #fb7185;
+            --primary-dark: #881337;
+            --accent: #fbbf24;
+            --bg-gradient: linear-gradient(135deg, #4c0519 0%, #881337 60%, #4c0519 100%);
+            --glass-bg: rgba(255, 215, 0, 0.05);
+            --glass-border: rgba(255, 215, 0, 0.15);
+            --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --text: #fff1f2;
+            --text-secondary: rgba(255, 241, 242, 0.7);
+            --card-gradient: linear-gradient(145deg, rgba(136, 19, 55, 0.4), rgba(0,0,0,0.2));
+        }
+
         html {
             background-color: #1a1625;
             /* Fix for Safari white background on elastic scroll */
@@ -1465,6 +1508,7 @@
 
         .modal.active {
             display: flex;
+            flex-direction: column;
         }
 
         .modal-content {
@@ -1546,13 +1590,58 @@
             }
         }
 
-        /* Fix Z-Indices for Modals/Overlays to be above Sidebars (2000) */
+        /* Fix Z-Indices for Modals/Overlays to be above Sidebars (9000) and PWA (10000) */
         .modal,
         #endGameOverlay,
         #flip7Overlay,
         #recapOverlay {
-            z-index: 3000 !important;
+            z-index: 11000 !important;
         }
+
+        /* Improved Carousel & Modal Styling */
+        .carousel-btn {
+            font-size: 24px;
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.05); 
+            color: white; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .carousel-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+        
+        @keyframes slideInRight { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes slideInLeft { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+
+        .theme-option {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .theme-option:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .theme-option.selected { border-color: var(--primary); background: rgba(139, 92, 246, 0.1); }
+        .theme-preview { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
 
 
@@ -2521,34 +2610,21 @@
             </div>
 
             <!-- 2. THEME SELECT -->
-            <div class="menu-item-col">
+            <div class="menu-item-row" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:background 0.2s;" onclick="openThemeModal()" onmouseenter="this.style.background='rgba(255,255,255,0.1)'" onmouseleave="this.style.background='rgba(255,255,255,0.05)'">
                 <span class="menu-label">🎨 Tema Tavolo</span>
-                <select id="themeSelect" onchange="changeTheme(this.value)" class="menu-select">
-                    <option value="default">🌌 Viola Notte (Default)</option>
-                    <option value="casino">🟢 Verde Casinò</option>
-                    <option value="deepblue">🔵 Blu Profondo</option>
-                </select>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:12px; opacity:0.6;">Modifica</span>
+                    <span style="opacity:0.6;">❯</span>
+                </div>
             </div>
 
             <!-- 3. CARD BACK SELECT -->
-            <div class="menu-item-col">
+            <div class="menu-item-row" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:background 0.2s;" onclick="openCardBackModal()" onmouseenter="this.style.background='rgba(255,255,255,0.1)'" onmouseleave="this.style.background='rgba(255,255,255,0.05)'">
                 <span class="menu-label">🎴 Dorso Carte</span>
-                <select id="cardBackSelect" onchange="changeCardBack(this.value)" class="menu-select">
-                    <option value="back">Default</option>
-                    <option value="custom_backs/back_30s">Cartoni Anni '30</option>
-                    <option value="custom_backs/back_blueprint">Progetto Tecnico</option>
-                    <option value="custom_backs/back_cyberpunk">Cyberpunk / Neon</option>
-                    <option value="custom_backs/back_deepState">Teorie del Complotto</option>
-                    <option value="custom_backs/back_gothic">Gotico</option>
-                    <option value="custom_backs/back_graffiti">Graffiti / Street</option>
-                    <option value="custom_backs/back_greek">Grecia Antica</option>
-                    <option value="custom_backs/back_jp">Giapponese (Ukiyo-e)</option>
-                    <option value="custom_backs/back_lsd">Psichedelico (LSD)</option>
-                    <option value="custom_backs/back_RickAndMorty">Rick & Morty</option>
-                    <option value="custom_backs/back_roma">Impero Romano</option>
-                    <option value="custom_backs/back_skibidi">Brainrot / Meme</option>
-                    <option value="custom_backs/back_vaporwave">Vaporwave</option>
-                </select>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:12px; opacity:0.6;">Scegli</span>
+                    <span style="opacity:0.6;">❯</span>
+                </div>
             </div>
 
             <div style="height:1px; background:rgba(255,255,255,0.1); margin:5px 0;"></div>
@@ -2593,7 +2669,7 @@
                 ☕ Offrimi un caffè
             </a>
             
-            <button class="btn-menu-link" onclick="qs('#creditsModal').classList.add('active')">
+            <button class="btn-menu-link" onclick="toggleLeftSidebar(); qs('#creditsModal').classList.add('active')">
                 ℹ️ Crediti
             </button>
             
@@ -2647,8 +2723,98 @@
         
         .sidebar-content.closing { animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important; }
         .sidebar-backdrop.closing { animation: fadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
-        /* Add fadeIn to backdrop by default when shown */
+        .modal-content-premium {
+            background: rgba(30, 27, 46, 0.85); /* Dark glass */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.6);
+            border-radius: 28px;
+            padding: 0;
+            overflow: hidden;
+            animation: fadeScaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 450px;
+            width: 90%;
+            display: flex;           /* FIX: Flex layout */
+            flex-direction: column;  /* FIX: Vertical stack */
+            max-height: 90vh;        /* FIX: Limit height */
+        }
+        .modal-header-premium {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(251, 191, 36, 0.05));
+            padding: 30px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .modal-header-icon {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+            animation: float 4s ease-in-out infinite;
+        }
+        .modal-body-premium {
+            padding: 15px; /* Reduced Padding */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            flex: 1; /* FIX: Fill available space */
+            min-height: 0; /* FIX: Enable scrolling */
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .premium-card:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .premium-title {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(to right, #e2e8f0, #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+
         .sidebar-backdrop { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .modal-footer-premium {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .rules-tabs .tab-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .rules-tabs .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
     </style>
     <div class="lobby glass" id="lobby"><img src="assets/Flip7 Logo.webp" alt="Flip 7"
             style="height:80px; margin-bottom:15px; cursor:pointer;"
@@ -2674,6 +2840,8 @@
             </div>
             <!-- MEME MODE SWITCH (Centered) -->
             <div id="memeSwitchContainer" style="margin: 15px 0 20px 0; display: flex; justify-content: center; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease;">
+                <!-- Theme Toggle -->
+                <!-- Theme Toggle REMOVED -->
                 <span style="font-size: 22px;">🎭</span>
                 <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 28px;">
                     <input type="checkbox" id="memeCheckbox" onchange="window.toggleMemeMode()">
@@ -2844,230 +3012,238 @@
                 </div>
             </div>
         </div>
-        <div class="modal" id="rulesModal">
-            <div class="modal-content glass"
-                style="width: 100%; max-width: 650px; height: 700px; max-height: 90vh; display:flex; flex-direction:column; padding: 0; background: rgba(20, 20, 30, 0.4); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 0 30px rgba(0,0,0,0.5);">
-                <div
-                    style="padding: 24px 24px 12px 24px; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink:0;">
-                    <h3
-                        style="margin:0; font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #fff, #a78bfa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">
-                        📜 Regole del Gioco</h3><button
-                        onclick="document.getElementById('rulesModal').classList.remove('active')"
-                        style="background:rgba(255,255,255,0.1); border:none; width:36px; height:36px; border-radius:50%; color:white; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;">&times;
-                    </button>
+        <!-- TARGET MODAL (Premium) -->
+        <div class="modal" id="targetModal">
+            <div class="modal-content-premium" style="max-width: 400px;">
+                    <div class="modal-header-premium" style="padding-bottom:15px;">
+                    <div style="font-size:60px; margin-bottom:10px;">🎯</div>
+                    <h2 id="modalTitle" class="premium-title" style="font-size:20px;">Scegli Bersaglio</h2>
+                    <div style="font-size:12px; opacity:0.6;">Seleziona un giocatore per l'azione</div>
                 </div>
-                <div class="rules-tabs" style="display:flex; gap:12px; padding: 18px 24px 8px 24px; flex-shrink:0;">
-                    <button class="tab-btn active" onclick="switchTab('tab-general')">Generale</button><button
-                        class="tab-btn" onclick="switchTab('tab-cards')">Carte</button><button class="tab-btn"
-                        onclick="switchTab('tab-actions')">Azioni</button></div>
-                <div class="rules-body" style="overflow-y:auto; padding: 10px 24px 24px 24px; flex:1;">
-                    <!-- GENERAL TAB -->
-                        <div id="tab-general" class="tab-content active">
-                            <p
-                                style="font-size:16px; line-height:1.7; margin-bottom:20px; color: rgba(255,255,255,0.9);">
-                                <strong>Flip 7</strong>è un gioco ad alto rischio dove il tempismo è tutto. L'obiettivo
-                                è
-                                accumulare il punteggio più alto pescando dal mazzo,
-                                ma la bramosia può essere fatale ! </p>
-                            <div
-                                style="background:rgba(244, 63, 94, 0.12); padding:20px; border-radius:16px; margin-bottom:20px; border:1px solid rgba(244, 63, 94, 0.25); display:flex; align-items:center; gap:20px;">
-                                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Enraged%20Face.png"
-                                    style="height:64px; filter: drop-shadow(0 0 10px rgba(244,63,94,0.4));"
-                                    alt="Bust Icon">
-                                <div><strong
-                                        style="color:#f87171; display:block; margin-bottom:6px; font-size: 16px; text-transform:uppercase; letter-spacing:1px;">BUST
-                                        (Sballare)</strong>
-                                    <p style="font-size:14px; margin:0; opacity:0.85; line-height:1.5;">Se peschi una
-                                        carta numero che <strong>è già presente</strong>nella tua mano corrente,
-                                        sballi immediatamente. <br>Perdi tutti i punti del round e la tua manche termina
-                                        qui. 😡 </p>
-                                </div>
-                            </div>
-                            <div
-                                style="background:linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.08)); padding:20px; border-radius:16px; margin-bottom:20px; border:1px solid rgba(168, 85, 247, 0.25); display:flex; gap:16px; align-items:center;">
-                                <img src="assets/cards/action_flip3.webp"
-                                    style="height:85px; filter:drop-shadow(0 4px 12px rgba(168,85,247,0.5)); transform:rotate(-4deg);">
-                                <div><strong
-                                        style="color:#c084fc; font-size: 16px; text-transform:uppercase; letter-spacing:1px;">FLIP
-                                        7 BONUS (+15)</strong>
-                                    <p style="font-size:14px; margin-top:6px; opacity:0.85; line-height:1.5;">Raccogli
-                                        <strong>7 carte numeriche DIVERSE</strong>per ottenere un bonus istantaneo di 15
-                                        punti. Se completi il Flip 7,
-                                        il tuo turno finisce ma il tuo punteggio è al sicuro ! </p>
-                                </div>
-                            </div>
-                            <h4 style="font-size: 16px; margin-bottom:12px; color: #fff;">Consigli Strategici:</h4>
-                            <ul
-                                style="padding-left:20px; font-size:14px; line-height:1.7; color: rgba(255,255,255,0.8); margin-bottom:10px;">
-                                <li><strong>Probabilità:</strong>Il valore della carta indica quante copie esistono nel
-                                    deck. Ci sono 12 carte "12",
-                                    ma solo una carta "1" .</li>
-                                <li><strong>Hit o Stay:</b>"Stay" salva il tuo punteggio corrente. "Hit" rischia tutto
-                                        per la gloria. Non aver paura di fermarti !</li>
-                                <li><strong>Osserva gli avversari:</strong>Le carte in gioco non possono essere pescate
-                                    di nuovo finché non vengono rimescolate. Controlla il tavolo !</li>
-                            </ul>
-                        </div>
-                        <!-- CARDS TAB -->
-                            <div id="tab-cards" class="tab-content">
-                                <div class="rules-section" style="margin-bottom:24px;">
-                                    <h4
-                                        style="color:#fbbf24; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-size:18px;">
-                                        Carte Numero (0-12)</h4>
-                                    <p style="font-size:15px; margin-bottom:15px; opacity:0.9;">Sono la linfa vitale del
-                                        gioco. La somma dei loro valori determina il tuo punteggio finale.</p>
-                                    <div
-                                        style="display:flex; gap:15px; margin:20px 0; justify-content:center; flex-wrap:wrap;">
-                                        <div style="text-align:center;"><img src="assets/cards/number_1.webp"
-                                                style="height:90px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.4);"><span
-                                                style="display:block; font-size:12px; margin-top:5px; color:#fbbf24;">Raro
-                                                (1 copia)</span></div>
-                                        <div style="text-align:center;"><img src="assets/cards/number_7.webp"
-                                                style="height:90px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.4);"><span
-                                                style="display:block; font-size:12px; margin-top:5px; color:#fbbf24;">Medio
-                                                (7 copie)</span></div>
-                                        <div style="text-align:center;"><img src="assets/cards/number_12.webp"
-                                                style="height:90px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.4);"><span
-                                                style="display:block; font-size:12px; margin-top:5px; color:#fbbf24;">Comune
-                                                (12 copie)</span></div>
-                                    </div>
-                                    <div
-                                        style="background:rgba(255,255,255,0.04); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
-                                        <strong style="display:block; margin-bottom:6px; font-size:14px; color:#fff;">📊
-                                            Distribuzione Deck</strong>
-                                        <p style="font-size:13px; opacity:0.8; margin:0; line-height:1.6;">• Carte 0-12:
-                                            Il numero di copie è pari al valore (tranne lo 0 che ha 1 copia).<br>• Più
-                                            carte numeriche hai,
-                                            più è probabile pescare un doppione.<br>• Carte 10,
-                                            11 e 12 sono le più pericolose da "accumulare" . </p>
-                                    </div>
-                                </div>
-                                <div class="rules-section">
-                                    <h4
-                                        style="color:#60a5fa; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; font-size:18px;">
-                                        Modifier (Punti Extra)</h4>
-                                    <div style="display:flex; gap:20px; margin:20px 0;">
-                                        <div
-                                            style="flex:1; text-align:center; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px;">
-                                            <img src="assets/cards/modifier_+6.webp"
-                                                style="height:100px; margin-bottom:10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"><strong
-                                                style="display:block; font-size:14px; color:#60a5fa;">Addizzionali</strong>
-                                            <p style="font-size:12px; opacity:0.8; margin-top:5px;">Aggiungono punti
-                                                fissi (+2, +4,
-                                                +6) al totale senza rischio di Bust.</p>
-                                        </div>
-                                        <div
-                                            style="flex:1; text-align:center; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px;">
-                                            <img src="assets/cards/modifier_x2.webp"
-                                                style="height:100px; margin-bottom:10px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"><strong
-                                                style="display:block; font-size:14px; color:#60a5fa;">Moltiplicatori</strong>
-                                            <p style="font-size:12px; opacity:0.8; margin-top:5px;">Raddoppiano la somma
-                                                delle sole carte numeriche. Esponenziale !</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- ACTIONS TAB -->
-                                <div id="tab-actions" class="tab-content">
-                                    <p style="font-size:14px; margin-bottom:20px; opacity:0.9;">Le Carte Azione cambiano
-                                        le sorti della partita. Usale per difenderti o ostacolare gli altri.</p>
-                                    <div class="action-rule"
-                                        style="margin-bottom:15px; background:linear-gradient(90deg, rgba(56, 189, 248, 0.15), transparent); border-radius:12px; padding:15px; border:1px solid rgba(56, 189, 248, 0.3); display:flex; gap:20px; align-items:center;">
-                                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Cold%20Face.png"
-                                            style="height:50px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.5));"
-                                            alt="Freeze Icon">
-                                        <div style="flex:1;">
-                                            <div
-                                                style="display:flex; justify-content:space-between; align-items:center;">
-                                                <strong style="font-size:17px; color:#7dd3fc;">Freeze</strong><img
-                                                    src="assets/cards/action_freeze.webp"
-                                                    style="height:45px; border-radius:4px;"></div>
-                                            <p style="font-size:13px; opacity:0.9; margin-top:6px; line-height:1.5;">
-                                                Seleziona un avversario per "congelarlo" . Sarà costretto a fare
-                                                <strong>Stay immediato</strong>,
-                                                perdendo la possibilità di pescare ancora. </p>
-                                        </div>
-                                    </div>
-                                    <div class="action-rule"
-                                        style="margin-bottom:15px; background:linear-gradient(90deg, rgba(245, 158, 11, 0.15), transparent); border-radius:12px; padding:15px; border:1px solid rgba(245, 158, 11, 0.3); display:flex; gap:20px; align-items:center;">
-                                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png"
-                                            style="height:50px; filter: drop-shadow(0 0 8px rgba(245,158,11,0.5));"
-                                            alt="Flip3 Icon">
-                                        <div style="flex:1;">
-                                            <div
-                                                style="display:flex; justify-content:space-between; align-items:center;">
-                                                <strong style="font-size:17px; color:#fcd34d;">Flip Three</strong><img
-                                                    src="assets/cards/action_flip3.webp"
-                                                    style="height:45px; border-radius:4px;"></div>
-                                            <p style="font-size:13px; opacity:0.9; margin-top:6px; line-height:1.5;">
-                                                Obbliga un avversario a pescare <strong>3 carte di fila</strong>. Se
-                                                sballa durante questa sequenza,
-                                                è fuori dal round ! ⚡ </p>
-                                        </div>
-                                    </div>
-                                    <div class="action-rule"
-                                        style="background:linear-gradient(90deg, rgba(244, 63, 94, 0.15), transparent); border-radius:12px; padding:15px; border:1px solid rgba(244, 63, 94, 0.3); display:flex; gap:20px; align-items:center;">
-                                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Heart%20on%20Fire.png"
-                                            style="height:50px; filter: drop-shadow(0 0 8px rgba(244,63,94,0.5));"
-                                            alt="SecondChance Icon">
-                                        <div style="flex:1;">
-                                            <div
-                                                style="display:flex; justify-content:space-between; align-items:center;">
-                                                <strong style="font-size:17px; color:#fda4af;">Second
-                                                    Chance</strong><img src="assets/cards/action_second_chance.webp"
-                                                    style="height:45px; border-radius:4px;"></div>
-                                            <p style="font-size:13px; opacity:0.9; margin-top:6px; line-height:1.5;">Se
-                                                sballi,
-                                                questa carta viene consumata per <strong>annullare il Bust</strong>.
-                                                Continuerai il tuo turno come se nulla fosse accaduto. ❤️‍🔥 </p>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="modal-body-premium" id="targetButtons" style="padding:20px; max-height:50vh;">
+                    <!-- Targets injected by JS -->
                 </div>
-                <div
-                    style="padding:20px 24px; border-top:1px solid rgba(255,255,255,0.1); text-align:center; flex-shrink:0;">
-                    <button class="btn" style="width:100%; height: 50px; font-size: 16px; font-weight: 600;"
-                        onclick="document.getElementById('rulesModal').classList.remove('active')">Ho capito !</button>
+                <div style="padding:15px; text-align:center;">
+                     <button class="btn btn-secondary" onclick="document.getElementById('targetModal').classList.remove('active')" style="width:100%;">Annulla</button>
                 </div>
             </div>
-            <style>
-                .rules-tabs .tab-btn {
-                    flex: 1;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: none;
-                    padding: 10px;
-                    color: rgba(255, 255, 255, 0.6);
-                    cursor: pointer;
-                    border-radius: 8px;
-                    transition: all 0.2s;
-                }
+        </div>
+        
+        <!-- CARD BACK MODAL (Infinite Carousel) -->
+        <div class="modal" id="cardBackModal">
+            <div class="modal-content-premium" style="max-width: 400px;">
+                <div class="modal-header-premium">
+                    <div style="font-size:60px; margin-bottom:10px;">🎨</div>
+                    <h2 class="premium-title">Scegli Dorso</h2>
+                </div>
+                
+                <div class="modal-body-premium" style="align-items:center; overflow:visible;">
+                    <!-- Carousel Container -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin:10px 0;">
+                        <button class="carousel-btn" onclick="prevBack()">❮</button>
+                        
+                        <div style="position:relative; width:140px; height:196px; perspective:1000px;">
+                            <img id="cbImage" src="assets/cards/back.webp" style="width:100%; height:100%; object-fit:contain; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); filter:drop-shadow(0 0 10px rgba(167, 139, 250, 0.4)); animation: cardFloat 3s ease-in-out infinite;">
+                        </div>
 
-                .rules-tabs .tab-btn.active {
-                    background: var(--primary);
-                    color: white;
-                    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-                }
+                        <button class="carousel-btn" onclick="nextBack()">❯</button>
+                    </div>
+                    
+                    <div style="text-align:center;">
+                        <h3 id="cbName" style="color:#fbbf24; font-size:22px; margin-bottom:5px;">Classico</h3>
+                        <p id="cbDesc" style="color:rgba(255,255,255,0.7); font-size:14px; min-height:40px;">Il dorso originale.</p>
+                        <div id="cbCounter" style="font-size:12px; opacity:0.5; margin-top:5px;">1 / 12</div>
+                    </div>
+                </div>
 
-                .tab-content {
-                    display: none;
-                    animation: fadeIn 0.3s;
-                }
+                <div style="padding:20px; text-align:center; border-top:1px solid rgba(255,255,255,0.05); display:flex; gap:10px;">
+                     <button class="btn btn-secondary" onclick="document.getElementById('cardBackModal').classList.remove('active')" style="flex:1;">Annulla</button>
+                     <button class="btn" onclick="selectCurrentBack()" style="flex:2;">Seleziona</button>
+                </div>
+            </div>
+        </div>
 
-                .tab-content.active {
-                    display: block;
-                }
+        <!-- THEME MODAL -->
+        <div class="modal" id="themeModal">
+            <div class="modal-content-premium" style="max-width: 400px;">
+                <div class="modal-header-premium">
+                    <div style="font-size:60px; margin-bottom:10px;">🎨</div>
+                    <h2 class="premium-title">Scegli Tema</h2>
+                </div>
+                <div class="modal-body-premium" id="themeList">
+                    <!-- Themes Injected JS -->
+                </div>
+                <div style="padding:15px; text-align:center;">
+                     <button class="btn btn-secondary" onclick="document.getElementById('themeModal').classList.remove('active')" style="width:100%;">Chiudi</button>
+                </div>
+            </div>
+        </div>
 
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(5px);
-                    }
 
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
+        <!-- RULES MODAL -->
+        <div class="modal" id="rulesModal">
+            <div class="modal-content-premium" style="max-width: 500px; height: 750px; max-height: 90vh;">
+                <div class="modal-header-premium">
+                    <div style="font-size:40px; margin-bottom:10px;">📖</div>
+                    <h2 class="premium-title">Regolamento Ufficiale</h2>
+                    <div style="font-size: 14px; opacity: 0.7; font-weight: normal;">Flip 7</div>
+                </div>
+                
+                <!-- Sticky Tabs -->
+                <div class="rules-tabs" style="display:flex; gap:10px; padding:10px 20px; background:rgba(0,0,0,0.2); border-bottom:1px solid rgba(255,255,255,0.1); overflow-x: auto; flex-shrink: 0;">
+                    <button class="tab-btn active" onclick="switchRulesTab('gen')">Generale</button>
+                    <button class="tab-btn" onclick="switchRulesTab('cards')">Carte</button>
+                    <button class="tab-btn" onclick="switchRulesTab('actions')">Azioni</button>
+                    <button class="tab-btn" onclick="switchRulesTab('score')">Punti</button>
+                </div>
+
+                <div class="modal-body-premium" id="rulesBody" style="flex: 1; overflow-y: auto; padding: 20px; position:relative;">
+                    
+                    <!-- TAB: GENERALE -->
+                    <div id="tab-gen" class="rules-section active">
+                        <p style="font-size:15px; line-height:1.6; opacity:0.9; margin-bottom:20px;">
+                            <strong>Flip 7</strong> è un gioco di rischio e fortuna. L'obiettivo è accumulare punti sommando le carte, ma... attenzione a non sballare!
+                        </p>
+
+                        <div class="premium-card" style="margin-bottom:15px; border-color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                <span style="font-size:24px;">💣</span>
+                                <strong style="color: #fca5a5; font-size:16px;">BUST (Sballare)</strong>
+                            </div>
+                            <p style="font-size:13px; opacity:0.9; margin:0; line-height:1.5;">
+                                Se peschi una carta numero che <strong>è già presente</strong> nella tua mano corrente, sballi immediatamente. 
+                                <br>Perdi tutti i punti del round! 😡
+                            </p>
+                        </div>
+                        
+                        <div class="premium-card" style="margin-bottom:15px; border-color: #a855f7; background: rgba(168, 85, 247, 0.1);">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                <span style="font-size:24px;">🏆</span>
+                                <strong style="color: #d8b4fe; font-size:16px;">FLIP 7 BONUS (+15)</strong>
+                            </div>
+                            <p style="font-size:13px; opacity:0.9; margin:0; line-height:1.5;">
+                                Raccogli <strong>7 carte uniche</strong> (tra numeri, azioni e modificatori) per vincere SUBITO il round con un bonus di 15 punti!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TAB: CARTE -->
+                    <div id="tab-cards" class="rules-section" style="display:none;">
+                        <h3 style="font-size:16px; color:#fbbf24; margin-bottom:10px;">Carte Numero (0-12)</h3>
+                        <p style="font-size:13px; opacity:0.8; margin-bottom:15px;">La quantità di carte nel mazzo è uguale al loro valore.</p>
+
+                        <div style="display:flex; gap:10px; margin-bottom:20px; justify-content:center;">
+                            <div style="text-align:center;">
+                                <img src="assets/cards/number_1.webp" style="height:70px; border-radius:6px; box-shadow:0 4px 8px rgba(0,0,0,0.3);">
+                                <div style="font-size:10px; margin-top:4px; opacity:0.6;">1 Copia</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <img src="assets/cards/number_7.webp" style="height:70px; border-radius:6px; box-shadow:0 4px 8px rgba(0,0,0,0.3);">
+                                <div style="font-size:10px; margin-top:4px; opacity:0.6;">7 Copie</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <img src="assets/cards/number_12.webp" style="height:70px; border-radius:6px; box-shadow:0 4px 8px rgba(0,0,0,0.3);">
+                                <div style="font-size:10px; margin-top:4px; opacity:0.6;">12 Copie</div>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size:16px; color:#60a5fa; margin-bottom:10px;">Modificatori</h3>
+                        <div class="premium-card" style="margin-bottom:10px;">
+                            <div style="display:flex; gap:15px; align-items:center;">
+                                <img src="assets/cards/modifier_+10.webp" style="height:50px; border-radius:4px;">
+                                <div>
+                                    <strong style="color:#60a5fa; font-size:14px;">Punti Extra (+N)</strong>
+                                    <p style="font-size:12px; opacity:0.7; margin:0;">Aggiungono valore al totale. <br><strong>NON vengono moltiplicati dal x2.</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="premium-card">
+                            <div style="display:flex; gap:15px; align-items:center;">
+                                <img src="assets/cards/modifier_x2.webp" style="height:50px; border-radius:4px;">
+                                <div>
+                                    <strong style="color:#60a5fa; font-size:14px;">Moltiplicatore (x2)</strong>
+                                    <p style="font-size:12px; opacity:0.7; margin:0;">Raddoppia SOLO la somma delle carte numero.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: AZIONI -->
+                    <div id="tab-actions" class="rules-section" style="display:none;">
+                        <p style="font-size:13px; opacity:0.8; margin-bottom:15px;">Le carte azione non danno punti, ma cambiano le sorti della partita.</p>
+
+                        <div class="premium-card" style="margin-bottom:15px; border-left: 3px solid #38bdf8;">
+                            <div style="display:flex; gap:15px;">
+                                <img src="assets/cards/action_freeze.webp" style="height:60px; border-radius:4px;">
+                                <div>
+                                    <strong style="color:#38bdf8; font-size:15px;">Freeze</strong>
+                                    <p style="font-size:12px; opacity:0.8; margin-top:4px; line-height:1.4;">
+                                        Scegli un avversario. Sarà costretto a <strong>FERMARSI (STAY)</strong> immediatamente!
+                                        <br>Il suo round finisce qui. ❄️
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-card" style="margin-bottom:15px; border-left: 3px solid #fbbf24;">
+                            <div style="display:flex; gap:15px;">
+                                <img src="assets/cards/action_flip3.webp" style="height:60px; border-radius:4px;">
+                                <div>
+                                    <strong style="color:#fbbf24; font-size:15px;">Flip 3</strong>
+                                    <p style="font-size:12px; opacity:0.8; margin-top:4px; line-height:1.4;">
+                                        Scegli un avversario. Dovrà pescare <strong>3 carte</strong> consecutive! Se sopravvive, tiene i punti.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-card" style="margin-bottom:15px; border-left: 3px solid #f43f5e;">
+                            <div style="display:flex; gap:15px;">
+                                <img src="assets/cards/action_second_chance.webp" style="height:60px; border-radius:4px;">
+                                <div>
+                                    <strong style="color:#f43f5e; font-size:15px;">Second Chance</strong>
+                                    <p style="font-size:12px; opacity:0.8; margin-top:4px; line-height:1.4;">
+                                        Protezione passiva. Se sballi, questa carta si brucia per salvarti e scartare il doppione.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: PUNTI -->
+                    <div id="tab-score" class="rules-section" style="display:none;">
+                        <h3 style="font-size:16px; margin-bottom:15px; color:#fff;">Calcolo Punteggio</h3>
+                        
+                        <div class="premium-card" style="margin-bottom:20px;">
+                            <div style="font-size:16px; font-weight:bold; margin-bottom:10px; text-align:center; color:#a78bfa;">Formula Ufficiale</div>
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:14px; margin-bottom:10px;">
+                                (Somma Numeri * x2) + Modificatori
+                            </div>
+                            <div style="font-size:12px; opacity:0.8; text-align:center;">
+                                * Il Bonus Flip 7 (+15) si aggiunge alla fine.
+                            </div>
+                        </div>
+
+                        <div class="premium-card">
+                            <strong style="display:block; margin-bottom:10px; font-size:14px; color:#22c55e;">Esempio Pratico</strong>
+                            <ul style="font-size:13px; opacity:0.8; list-style-type:none; padding:0; margin:0; line-height:1.8;">
+                                <li>🃏 Carte Numero: <strong>5, 10, 2</strong> (Somma: 17)</li>
+                                <li>✖️ Moltiplicatore: <strong>x2</strong> (17 * 2 = 34)</li>
+                                <li>➕ Modificatore: <strong>+4</strong> (34 + 4 = 38)</li>
+                                <li style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:5px;">
+                                    Totale Round: <strong style="color:#fbbf24; font-size:15px;">38 Punti</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer-premium">
+                    <button class="btn btn-primary" onclick="closeModal('rulesModal')">Ho Capito!</button>
+                </div>
+            </div>
+        </div>
+                
             </style>
             <script>
                 function switchTab(id) {
@@ -3117,10 +3293,76 @@
             // GLOBAL GAME STATE
             window.GAME_STATE = { memeMode: false };
 
-             // Sound Effects using Howler.js
+            // Sound Effects using Howler.js
             const SFX = {
                 enabled: true,
-                currentActionSound: null, // Track looping/long sounds to stop them
+                currentActionSound: null,
+                sounds: {}, // Placeholder if sounds meant to be here
+                
+                // THEME SYSTEM
+                themes: ['default', 'casino', 'deepblue', 'cyberpunk', 'minimalist', 'velvet', 'glass'],
+                currentThemeIdx: 0,
+                
+                init: function () {
+                    // Theme Init
+                    const savedTheme = localStorage.getItem('flip7_theme');
+                    if (savedTheme && this.themes.includes(savedTheme)) {
+                        this.currentThemeIdx = this.themes.indexOf(savedTheme);
+                        this.setTheme(savedTheme, true); // Silent init
+                    }
+                    
+                    // Init Sounds if needed here or elsewhere
+                    try {
+                        this.sounds.click = new Howl({ src: ['assets/sfx/click.mp3'] });
+                        this.sounds.flip = new Howl({ src: ['assets/sfx/flip.mp3'] });
+                        this.sounds.bust = new Howl({ src: ['assets/sfx/bust.mp3'] });
+                        this.sounds.win = new Howl({ src: ['assets/sfx/win.mp3'] });
+                    } catch(e) { }
+                },
+
+                play: function(name) {
+                    if(!this.enabled || !this.sounds[name]) return;
+                    this.sounds[name].play();
+                },
+
+                cycleTheme: function() {
+                    this.currentThemeIdx = (this.currentThemeIdx + 1) % this.themes.length;
+                    const newTheme = this.themes[this.currentThemeIdx];
+                    this.setTheme(newTheme);
+                },
+
+                setTheme: function(name, silent = false) {
+                    // 1. Update Index
+                    const idx = this.themes.indexOf(name);
+                    if (idx !== -1) this.currentThemeIdx = idx;
+
+                    // 2. Set Data Attribute (for CSS variables)
+                    if (name === 'default') {
+                        document.documentElement.removeAttribute('data-theme');
+                    } else {
+                        document.documentElement.setAttribute('data-theme', name);
+                    }
+                    
+                    // 3. Call Enhanced ChangeTheme (for specific body styles like Gradients)
+                    if (typeof changeTheme === 'function') {
+                        changeTheme(name, silent);
+                    }
+
+                    localStorage.setItem('flip7_theme', name);
+                    
+                    // 4. Update Meta Theme Color
+                    let color = '#1a1625';
+                    if (name === 'cyberpunk') color = '#050510';
+                    else if (name === 'minimalist') color = '#000000'; // Dark Minimalist
+                    else if (name === 'velvet') color = '#4c0519';
+                    else if (name === 'glass') color = '#334155';
+                    else if (name === 'casino') color = '#064e3b';
+                    else if (name === 'deepblue') color = '#1e3a8a';
+                    
+                    const meta = document.querySelector('meta[name="theme-color"]');
+                    if (meta) meta.setAttribute('content', color);
+                },
+
                 sounds: {
                     // ... (existing normal sounds will be here, we keep them for now, will update next)
                     // Core Gameplay
@@ -3210,20 +3452,46 @@
                     user_reaction: [ new Howl({ src: ['assets/sounds/user_reaction.mp3'] }) ] // Normal
                 }, 
                 
-                play: function (type) {
+                getMemeVariant: function(type) {
+                    if (!this.memeSounds[type] || !Array.isArray(this.memeSounds[type])) return null;
+                    return Math.floor(Math.random() * this.memeSounds[type].length);
+                },
+
+                play: function (type, variant = null) {
                     if (!this.enabled) return;
                     
                     // Check Meme Mode
                     if (state && state.memeMode && this.memeSounds[type]) {
-                        const s = this.getRandomMemeSound(this.memeSounds[type]);
+                        // Use provided variant if valid, otherwise random
+                        const sounds = this.memeSounds[type];
+                        // Validate variant index
+                        let s;
+                        if (variant !== null && variant >= 0 && variant < sounds.length) {
+                             s = sounds[variant];
+                        } else {
+                             // If no variant provided, pick one and RETURN it so caller can broadcast it
+                             // BUT we can't easily return from here to the caller of 'play'. 
+                             // The caller should have called getMemeVariant first if they wanted to sync.
+                             // If we are here without a variant, it means it's a local sound or we are the host initiating it?
+                             // Actually, for sync, the HOST picks the variant and broadcasts 'play(type, v)'.
+                             // The CLIENT receives 'play(type, v)'.
+                             // If we are just playing locally (UI click), random is fine.
+                             s = this.getRandomMemeSound(sounds);
+                        }
+                        
                         if (s) {
                              // Stop previous action sound if needed
-                             if (['action_required', 'win_match', 'lose_match'].includes(type)) {
-                                 if (this.currentActionSound) this.currentActionSound.stop();
+                             if (['action_required', 'win_match', 'lose_match'].includes(type) || type.startsWith('player_flipping3') || type === 'player_has_6_cards') {
+                                 if (this.currentActionSound) {
+                                     this.currentActionSound.stop();
+                                     this.currentActionSound = null;
+                                 }
+                                 
+                                 // For 6 cards, we might want to loop or just play once. Let's play once for now.
                                  this.currentActionSound = s;
                              }
                              s.play();
-                             return;
+                             return; // Don't play normal sound
                         }
                     }
 
@@ -3969,7 +4237,7 @@
                 }
                 // FIX: Broadcast SFX
                 else if (d.t === 'sfx') {
-                    SFX.play(d.id);
+                    SFX.play(d.id, d.v); // Pass variant
                 }
                 // NEW: Match End logic for Winner/Loser sounds
                 else if (d.t === 'match_end') {
@@ -4376,8 +4644,14 @@
                     showToast("Mescolo le carte... 🔀");
                     
                     // Shuffle Sound
-                    if (isHost) bc({ t: 'sfx', id: 'shuffle' });
-                    SFX.play('shuffle');
+                    // Shuffle Sound
+                    if (isHost) {
+                        const v = SFX.getMemeVariant('shuffle');
+                        bc({ t: 'sfx', id: 'shuffle', v: v });
+                        SFX.play('shuffle', v);
+                    } else {
+                         SFX.play('shuffle');
+                    }
 
                     setTimeout(() => {
                         deckEl.classList.remove('shuffling');
@@ -4489,8 +4763,13 @@
                 
                 // Meme Trigger: Start flipping
                 if (state.flip3State.count === 0 && state.flip3State.active) {
-                    if (isHost && window.GAME_STATE && window.GAME_STATE.memeMode) bc({ t: 'sfx', id: 'player_flipping3' });
-                    SFX.play('player_flipping3');
+                    if (isHost && window.GAME_STATE && window.GAME_STATE.memeMode) {
+                        const v = SFX.getMemeVariant('player_flipping3');
+                        bc({ t: 'sfx', id: 'player_flipping3', v: v });
+                        SFX.play('player_flipping3', v);
+                    } else if (!isHost) {
+                        SFX.play('player_flipping3'); 
+                    }
                 }
 
                 if (state.flip3State.count < 3 && tgt.st === 'active') {
@@ -4522,8 +4801,13 @@
                     // If we are here, loop finished.
                     // If tgt is active, it means Success.
                     if (tgt.st === 'active') {
-                        if (isHost && window.GAME_STATE && window.GAME_STATE.memeMode) bc({ t: 'sfx', id: 'player_flipping3_success' });
-                        SFX.play('player_flipping3_success');
+                        if (isHost && window.GAME_STATE && window.GAME_STATE.memeMode) {
+                            const v = SFX.getMemeVariant('player_flipping3_success');
+                            bc({ t: 'sfx', id: 'player_flipping3_success', v: v });
+                            SFX.play('player_flipping3_success', v);
+                        } else {
+                            SFX.play('player_flipping3_success');
+                        }
                     }
                     
                     state.flip3State.active = false;
@@ -4571,6 +4855,45 @@
                     const res = drawCard(pIdx);
                     if (res === 'WAIT' || res === 'END') return;
 
+                    // MEME MODE HIT SOUND
+                    // If simple number card (and not modifier/action handling below), we play sound here?
+                    // drawCard handles 'number' logic.
+                    // If we want specific HIT sound vs generic DEAL sound:
+                    // 'deal' is usually the sliding sound. 'hit' is the player decision.
+                    // Here, we are in dealLoop, which services 'Hit'. 
+                    // But wait, dealLoop ALSO services the initial 1 card deal.
+                    // If state.dealIndex < state.players.length * 1 (initial deal), maybe keep quiet or simple deal.
+                    // If round is > 0 or after initial deal?
+                    
+                    // Actually, 'handleAct' calls 'dealLoop'. 
+                    // Let's check if this is an 'action' result or just a card.
+                    // For Meme Mode, we want every card dealt (that isn't a special event) to potentially trigger a sound?
+                    // Or just when a player explicitly HITs?
+                    // User said: "Hit button should trigger specific SFX".
+                    // The Hit button sends 'act: hit' -> handleAct -> dealLoop.
+                    
+                    // Let's add sound logic inside drawCard or here.
+                    // Here is safer to coordinate with 'deal' sound.
+                    
+                    if (window.GAME_STATE && window.GAME_STATE.memeMode) {
+                        // If it's a number card (not mod/action), play a 'hit' meme sound
+                        // Modifiers are handled in drawCard? No, logic is there.
+                        // state.last is the card just drawn.
+                        if (state.last && state.last.type === 'number') {
+                             const v = SFX.getMemeVariant('hit');
+                             bc({ t: 'sfx', id: 'hit', v: v }); // Broadcast exact variant
+                             SFX.play('hit', v);
+                        } else {
+                             // Modifiers/Actions will likely have their own sounds in drawCard or below?
+                             // Currently they default to 'deal' if not caught.
+                             // Let's play standard deal for them if no specific logic overrides.
+                             SFX.play('deal'); 
+                        }
+                    } else {
+                        // Normal mode
+                        SFX.play('deal');
+                    }
+
                     // Synchronous Pending or Flip 3 Sequence
                     if (state.pending || (state.players.some(x => x.flip3Active))) {
                         state.dealIndex++;
@@ -4613,8 +4936,12 @@
                 
                 // Duration Logic
                 let duration = 2000;
-                if (window.GAME_STATE && window.GAME_STATE.memeMode && ['star', 'flip7', 'second_chance'].includes(type)) {
-                    duration = 15000;
+                if (window.GAME_STATE && window.GAME_STATE.memeMode) {
+                    if (['star', 'flip7', 'second_chance'].includes(type)) {
+                        duration = 10000;
+                    }
+                    // Also modifiers splash? If we splash them?
+                    // Currently modifiers don't splash, only actions.
                 }
 
                 // Animation styles for splash
@@ -4801,8 +5128,12 @@
                         else {
                             p.st = 'bust'; p.pts = 0; p.bustTime = Date.now();
                             trackBust(p.id); // Stats tracking
-                            SFX.play('bust');
-                            if (isHost) bc({ t: 'sfx', id: 'bust' });
+                            SFX.play('bust'); // Fallback / Local
+                            if (isHost) {
+                                const v = SFX.getMemeVariant('bust');
+                                bc({ t: 'sfx', id: 'bust', v: v });
+                                SFX.play('bust', v);
+                            }
                             
                             // MEME TRIGGERS: Bust on 2 or 7 (Total cards including this one)
                             const totalCards = p.cards.length + 1; // c is not pushed yet in else block? No, look below...
@@ -4813,17 +5144,28 @@
                             
                             if (window.GAME_STATE && window.GAME_STATE.memeMode) {
                                 if (p.cards.length + 1 === 2) {
-                                    if (isHost) bc({ t: 'sfx', id: 'bust_on_two' });
-                                    SFX.play('bust_on_two');
+                                    if (isHost) {
+                                        const v = SFX.getMemeVariant('bust_on_two');
+                                        bc({ t: 'sfx', id: 'bust_on_two', v: v });
+                                        SFX.play('bust_on_two', v);
+                                    }
                                 } else if (p.cards.length + 1 === 7) {
-                                    if (isHost) bc({ t: 'sfx', id: 'bust_on_seven' });
-                                    SFX.play('bust_on_seven');
+                                    if (isHost) {
+                                        const v = SFX.getMemeVariant('bust_on_seven');
+                                        bc({ t: 'sfx', id: 'bust_on_seven', v: v });
+                                        SFX.play('bust_on_seven', v);
+                                    }
                                 }
                                 
                                 // Meme Flip3 Fail Trigger
                                 if (p.flip3Active) {
-                                    if (isHost) bc({ t: 'sfx', id: 'player_flipping3_fail' });
-                                    SFX.play('player_flipping3_fail');
+                                    if (isHost) {
+                                        const v = SFX.getMemeVariant('player_flipping3_fail');
+                                        bc({ t: 'sfx', id: 'player_flipping3_fail', v: v });
+                                        SFX.play('player_flipping3_fail', v);
+                                    } else {
+                                        SFX.play('player_flipping3_fail');
+                                    }
                                 }
                             }
 
@@ -4855,8 +5197,12 @@
                             console.log(`🎉 FLIP7 triggered for ${p.name}! Unique nums: ${p.nums.size}, Cards in hand: ${p.cards.filter(c => c.type === 'number').length}, Nums Set:`, [...p.nums]);
                             p.st = 'flip7'; p.pts = calcPts(p);
                             trackFlip7(p.id); // Stats tracking
-                            SFX.play('flip7');
-                            if (isHost) bc({ t: 'sfx', id: 'flip7' });
+                            SFX.play('flip7'); // Local fallback
+                            if (isHost) {
+                                const v = SFX.getMemeVariant('flip7');
+                                bc({ t: 'sfx', id: 'flip7', v: v });
+                                SFX.play('flip7', v);
+                            }
                             // Only fire if I am this player
                             if (p.id === myId) {
                                 fireConfetti('flip7'); // Function logic removed, add inline here or restore?
@@ -4881,23 +5227,31 @@
                             if (isHost) {
                                 // User Pref: Always use 'deal' sound, even for manual hit
                                 const sound = 'deal';
-                                SFX.play(sound);
-                                bc({ t: 'sfx', id: sound });
+                                const v = SFX.getMemeVariant(sound);
+                                SFX.play(sound, v);
+                                bc({ t: 'sfx', id: sound, v: v });
                             }
                             addToHistory(`${p.name} ha pescato ${c.value}`, 'normal');
                             
                             // MEME TRIGGER: Player has 6 cards (total)
                             // Prompt says "raggiunge 6 carte".
                             if (window.GAME_STATE && window.GAME_STATE.memeMode && p.cards.length === 6) {
-                                if (isHost) bc({ t: 'sfx', id: 'player_has_6_cards' });
-                                SFX.play('player_has_6_cards');
+                                if (isHost) {
+                                    const v = SFX.getMemeVariant('player_has_6_cards');
+                                    bc({ t: 'sfx', id: 'player_has_6_cards', v: v });
+                                    SFX.play('player_has_6_cards', v);
+                                }
                             }
                         }
                     }
                 } else if (c.type === 'modifier') {
                     p.mods.push(c); p.cards.push(c); p.pts = calcPts(p);
                     SFX.play('modifier_card');
-                    if (isHost) bc({ t: 'sfx', id: 'modifier_card' });
+                    if (isHost) {
+                         const v = SFX.getMemeVariant('modifier_card');
+                         bc({ t: 'sfx', id: 'modifier_card', v: v });
+                         SFX.play('modifier_card', v);
+                    }
                     
                     // MEME TRIGGERS: Specific Modifiers
                     if (window.GAME_STATE && window.GAME_STATE.memeMode) {
@@ -4906,8 +5260,13 @@
                         else if (['+2','+4','+6','+8','+10'].includes(c.value)) mid = `modifier_${c.value}`;
                         
                         if (mid) {
-                            if (isHost) bc({ t: 'sfx', id: mid });
-                            SFX.play(mid);
+                            if (isHost) {
+                                const v = SFX.getMemeVariant(mid);
+                                bc({ t: 'sfx', id: mid, v: v });
+                                SFX.play(mid, v);
+                            } else {
+                                SFX.play(mid);
+                            }
                         }
                     }
                     
@@ -4945,7 +5304,11 @@
                         else if (c.value === 'second_chance') sfxId = 'sc_gain';
 
                         SFX.play(sfxId);
-                        if (isHost) bc({ t: 'sfx', id: sfxId });
+                        if (isHost) {
+                             const v = SFX.getMemeVariant(sfxId);
+                             bc({ t: 'sfx', id: sfxId, v: v });
+                             SFX.play(sfxId, v);
+                        }
                         
                         const actionIcons = { freeze: '❄️ Freeze', flip3: '⚡ Flip 3', second_chance: '❤️ Second Chance' };
                         addToHistory(`${p.name} ha pescato ${actionIcons[c.value] || c.value}!`, 'special');
@@ -5010,7 +5373,13 @@
                                             // check surrounding: c.value === 'freeze'.
                                             // Wait, drawCard runs on whoever triggered it. 
                                             // If I drew it, I run this.
-                                            SFX.play('freezed'); 
+                                            if (isHost) {
+                                                const v = SFX.getMemeVariant('freezed');
+                                                bc({ t: 'sfx', id: 'freezed', v: v });
+                                                SFX.play('freezed', v);
+                                            } else {
+                                                SFX.play('freezed');
+                                            }
                                         }
 
                                         if (state.dealingPhase) dealLoop(); // Resume deal
@@ -5145,8 +5514,15 @@
                         if (isHost) setTimeout(showTgt, delay);
                     } else if (p.st !== 'active') { if (p.st === 'bust') setTimeout(() => nextTurn(), 3000); else nextTurn(); }
                 } else if (act === 'stay' && idx === state.turn) {
-                    SFX.play('stay');
-                    if (isHost) bc({ t: 'sfx', id: 'stay' });
+                    if (isHost) {
+                        const v = SFX.getMemeVariant('stay');
+                        bc({ t: 'sfx', id: 'stay', v: v });
+                        SFX.play('stay', v);
+                    } else {
+                        // Client local fallback (mute if needed to avoid double?)
+                        // Client plays local sound immediately for responsiveness
+                        SFX.play('stay'); 
+                    }
                     p.st = 'stayed';
                     trackStay(p.id); // Stats tracking
                     addToHistory(`${p.name} si è fermato`, 'normal');
@@ -5206,21 +5582,26 @@
                     const isHighRisk = (p.tot === maxScore && p.tot > 0);
 
                     const div = document.createElement('div');
-                    div.className = 'target-item';
+                    div.className = 'premium-card target-item'; // Use Premium Card style
                     if (isHighRisk) div.classList.add('high-risk');
+                    div.style.marginBottom = '10px';
+                    div.style.cursor = 'pointer';
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.justifyContent = 'space-between';
 
                     // Content
                     div.innerHTML = `
                     <div style="flex:1;">
-                        <div style="font-weight:700; font-size:16px; display:flex; align-items:center; gap:6px;">
+                        <div style="font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px;">
                             ${p.name}
-                            ${isHighRisk ? '<span title="High Score Danger">🔥</span>' : ''}
+                            ${isHighRisk ? '<span title="High Score Danger" style="font-size:18px; filter:drop-shadow(0 0 5px red);">🔥</span>' : ''}
                         </div>
-                        <div style="font-size:12px; opacity:0.8; margin-top:2px;">
-                            Round: <strong>${p.pts}</strong> | Tot: <strong>${p.tot}</strong>
+                        <div style="font-size:12px; opacity:0.8; margin-top:4px;">
+                            Round: <strong style="color:#A78BFA">${p.pts}</strong> | Tot: <strong style="color:#fbbf24">${p.tot}</strong>
                         </div>
                     </div>
-                    <div style="font-size:20px; opacity:0.6;">🎯</div>
+                    <div style="font-size:24px; opacity:0.8; filter:drop-shadow(0 0 5px rgba(255,255,255,0.3));">🎯</div>
                 `;
 
                     div.onclick = () => {
@@ -5773,6 +6154,18 @@
 
             function smartUpdateCards(container, cards, p, isMe, typeStr) {
                 // FIX: Use Name key for animation consistency across rejoins
+                // tension check
+                if (state.memeMode && p.nums.size === 6 && !p.hasTension) {
+                     p.hasTension = true; // Flag to prevent spamming
+                     if (isHost) {
+                         const v = SFX.getMemeVariant('player_has_6_cards');
+                         bc({ t: 'sfx', id: 'player_has_6_cards', v: v });
+                         SFX.play('player_has_6_cards', v);
+                     }
+                } else if (p.nums.size !== 6) {
+                     p.hasTension = false;
+                }
+
                 if (!localPlayerCardCounts[p.name]) localPlayerCardCounts[p.name] = { nums: 0, mods: 0 };
                 if (!localAnimatingCards[p.name]) localAnimatingCards[p.name] = { nums: {}, mods: {} };
 
@@ -5909,7 +6302,7 @@
                                 <img src="https://em-content.zobj.net/source/microsoft-teams/400/speech-balloon_1f4ac.png" style="height:30px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.5));">
                             </button>
                             
-                            <div id="recapReactionPicker" class="glass" style="display:none; position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:320px; grid-template-columns:repeat(6, 1fr); gap:6px; padding:10px; z-index:4000; border:1px solid rgba(255,255,255,0.2); box-shadow:0 10px 40px rgba(0,0,0,0.5); background:rgba(20,20,30,0.8); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);">
+                            <div id="recapReactionPicker" class="glass" style="display:none; position:absolute; bottom:60px; left:50%; transform:translateX(-50%); width:320px; grid-template-columns:repeat(6, 1fr); gap:6px; padding:10px; z-index:9999; border:1px solid rgba(255,255,255,0.2); box-shadow:0 10px 40px rgba(0,0,0,0.5); background:rgba(20,20,30,0.8); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);">
                                 ${REACTIONS.map(r => `
                                     <div onclick="sendReaction('${r.id}')" style="cursor:pointer; padding:5px; border-radius:8px; display:flex; justify-content:center; align-items:center; transition:transform 0.2s;" onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'">
                                         <img src="${r.src}" style="width:32px; height:32px; pointer-events:none;">
@@ -6377,6 +6770,74 @@
                 }
             }
 
+            // CARD BACK CONFIG
+            const BACKS = [
+                { id: 'back', name: 'Classico', desc: 'Il dorso originale di Flip 7.', src: 'assets/cards/back.webp' },
+                { id: 'back_30s', name: 'Anni 30', desc: 'Stile vintage raffinato.', src: 'assets/cards/custom_backs/back_30s.webp' },
+                { id: 'back_cyberpunk', name: 'Cyberpunk', desc: 'Neon e circuiti futuristici.', src: 'assets/cards/custom_backs/back_cyberpunk.webp' },
+                { id: 'back_vaporwave', name: 'Vaporwave', desc: 'Estetica anni 80 retrò.', src: 'assets/cards/custom_backs/back_vaporwave.webp' },
+                { id: 'back_gothic', name: 'Gothic', desc: 'Oscuro ed elegante.', src: 'assets/cards/custom_backs/back_gothic.webp' },
+                { id: 'back_jp', name: 'Nippon', desc: 'Ispirazione giapponese.', src: 'assets/cards/custom_backs/back_jp.webp' },
+                { id: 'back_greek', name: 'Olimpo', desc: 'Miti e leggende.', src: 'assets/cards/custom_backs/back_greek.webp' },
+                { id: 'back_roma', name: 'Roma', desc: 'Gloria eterna.', src: 'assets/cards/custom_backs/back_roma.webp' },
+                { id: 'back_deepState', name: 'Deep State', desc: 'Top Secret.', src: 'assets/cards/custom_backs/back_deepState.webp' },
+                { id: 'back_blueprint', name: 'Blueprint', desc: 'Progettazione tecnica.', src: 'assets/cards/custom_backs/back_blueprint.webp' },
+                { id: 'back_graffiti', name: 'Graffiti', desc: 'Arte urbana.', src: 'assets/cards/custom_backs/back_graffiti.webp' },
+                { id: 'back_lsd', name: 'Psychedelic', desc: 'Colori in movimento.', src: 'assets/cards/custom_backs/back_lsd.webp' },
+            ];
+
+            let currentBackIdx = 0;
+
+            function openCardBackModal() {
+                 if (qs('#leftSidebarDisplay')) toggleLeftSidebar(); // Close sidebar if open
+                 qs('#cardBackModal').classList.add('active');
+                 
+                 // Find current index
+                 const currentSrc = window.userCardBack || 'assets/cards/back.webp';
+                 const found = BACKS.findIndex(b => currentSrc.includes(b.src) || (b.id === 'back' && currentSrc.includes('back.webp')));
+                 currentBackIdx = found !== -1 ? found : 0;
+                 renderBackCarousel();
+            }
+
+            function renderBackCarousel() {
+                const item = BACKS[currentBackIdx];
+                const img = qs('#cbImage');
+                // Animation reset
+                img.style.animation = 'none';
+                img.offsetHeight; /* trigger reflow */
+                img.style.animation = 'float 3s ease-in-out infinite';
+                
+                img.src = item.src;
+                qs('#cbName').innerText = item.name;
+                qs('#cbDesc').innerText = item.desc;
+                
+                // Update Counter
+                qs('#cbCounter').innerText = `${currentBackIdx + 1} / ${BACKS.length}`;
+            }
+
+            function nextBack() {
+                currentBackIdx = (currentBackIdx + 1) % BACKS.length;
+                renderBackCarousel();
+            }
+            function prevBack() {
+                currentBackIdx = (currentBackIdx - 1 + BACKS.length) % BACKS.length;
+                renderBackCarousel();
+            }
+
+            function selectCurrentBack() {
+                const item = BACKS[currentBackIdx];
+                window.userCardBack = item.src;
+                
+                // Update DOM
+                document.querySelectorAll('.card.back, .deck-back-img').forEach(img => {
+                    img.src = window.userCardBack;
+                });
+                document.documentElement.style.setProperty('--card-back-url', `url('${window.userCardBack}')`);
+                
+                showToast(`Dorso impostato: ${item.name}`);
+                qs('#cardBackModal').classList.remove('active');
+            }
+
             const cardImages = {};
             const assets = [
                 'back', 'action_flip3', 'action_freeze', 'action_second_chance',
@@ -6399,24 +6860,39 @@
                 showToast(enabled ? "🔊 Audio attivato" : "🔇 Audio disattivato");
             }
 
-            function changeTheme(theme) {
+            function changeTheme(theme, silent = false) {
                 const body = document.body;
                 // Simple background switch - can be enhanced with classes
                 if (theme === 'casino') {
                     body.style.background = 'radial-gradient(circle at center, #166534, #052e16)';
                     body.style.setProperty('--primary', '#22c55e');
                     body.style.setProperty('--accent', '#facc15');
+                    body.style.color = '#ffffff';
                 } else if (theme === 'deepblue') {
                     body.style.background = 'radial-gradient(circle at center, #1e3a8a, #0f172a)';
                     body.style.setProperty('--primary', '#3b82f6');
                     body.style.setProperty('--accent', '#60a5fa');
+                    body.style.color = '#ffffff';
+                } else if (theme === 'minimalist') {
+                    // Dark Minimalist: Black bg, White text, visible borders
+                    body.style.background = '#000000';
+                    body.style.color = '#ffffff';
+                    body.style.setProperty('--primary', '#ffffff');
+                    body.style.setProperty('--accent', '#a3a3a3');
+                } else if (theme === 'glass') {
+                    // Distinct Glass: Gray/Silver smooth gradient
+                    body.style.background = 'linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)';
+                    body.style.setProperty('--primary', '#334155');
+                    body.style.setProperty('--accent', '#475569');
+                    body.style.color = '#0f172a'; // Darker text for glass
                 } else {
-                    // Default Viola Notte (Restore Original)
-                    body.style.background = ''; // Fallback to CSS var(--bg-gradient)
+                    // Default Viola Notte
+                    body.style.background = ''; 
                     body.style.setProperty('--primary', '#8B5CF6');
                     body.style.setProperty('--accent', '#C084FC');
+                    body.style.color = 'white';
                 }
-                showToast("Tema aggiornato! 🎨");
+                if (!silent) showToast("Tema aggiornato! 🎨");
             }
 
             // Card Back Logic
@@ -6492,7 +6968,7 @@
 
                 // Buttons
                 qs('#btnPrevTut').disabled = n === 1;
-                qs('#btnNextTut').innerText = n === totalTutSlides ? "Chiudi" : "Avanti";
+                qs('#btnNextTut').innerText = n === totalTutSlides ? "Capito!" : "Avanti";
                 qs('#btnNextTut').onclick = n === totalTutSlides ? () => qs('#tutorialModal').classList.remove('active') : nextTutSlide;
             }
 
@@ -6505,6 +6981,7 @@
             }
 
             window.onload = () => {
+                if(SFX.init) SFX.init();
                 preloadImages();
                 handleHashChange();
 
@@ -6654,6 +7131,172 @@
                     }
                 }
             }
+            // === THEME MODAL LOGIC ===
+            function openThemeModal() {
+                 if (qs('#leftSidebarDisplay')) toggleLeftSidebar();
+                 qs('#themeModal').classList.add('active');
+                 renderThemeList();
+            }
+
+            function renderThemeList() {
+                 const container = qs('#themeList');
+                 container.innerHTML = '';
+                 
+                 const themes = [
+                     { id: 'default', name: 'Viola Notte', colors: 'linear-gradient(135deg, #1a1625, #2d1f47)' },
+                     { id: 'casino', name: 'Verde Casinò', colors: 'linear-gradient(135deg, #064e3b, #10b981)' },
+                     { id: 'deepblue', name: 'Blu Profondo', colors: 'linear-gradient(135deg, #1e3a8a, #3b82f6)' },
+                     { id: 'cyberpunk', name: 'Cyberpunk', colors: 'linear-gradient(135deg, #050510, #00f0ff)' },
+                     { id: 'minimalist', name: 'Minimalist', colors: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)' },
+                     { id: 'velvet', name: 'Velvet', colors: 'linear-gradient(135deg, #4c0519, #881337)' },
+                     { id: 'glass', name: 'Glassmorphism', colors: 'linear-gradient(135deg, #64748b, #cbd5e1)' }
+                 ];
+                 
+                 const current = (SFX.themes && SFX.currentThemeIdx >= 0) ? SFX.themes[SFX.currentThemeIdx] : 'default';
+
+                 themes.forEach(t => {
+                     const isSelected = t.id === current;
+                     const div = document.createElement('div');
+                     div.className = `theme-option ${isSelected ? 'selected' : ''}`;
+                     div.onclick = () => { selectTheme(t.id); };
+                     div.innerHTML = `
+                        <div class="theme-preview" style="background:${t.colors}"></div>
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; color:var(--text);">${t.name}</div>
+                            ${isSelected ? '<div style="font-size:11px; color:var(--primary);">Attivo</div>' : ''}
+                        </div>
+                        ${isSelected ? '✅' : ''}
+                     `;
+                     container.appendChild(div);
+                 });
+            }
+
+            function selectTheme(id) {
+                if(SFX.setTheme) {
+                    SFX.setTheme(id);
+                    // Sync index logic handled in SFX or here
+                    // Update external check
+                    const idx = SFX.themes.indexOf(id);
+                    if (idx !== -1) SFX.currentThemeIdx = idx;
+                } else {
+                     // Fallback if SFX logic incomplete
+                     changeTheme(id);
+                }
+                
+                renderThemeList(); // Re-render to update selection
+                if(SFX.play) SFX.play('click');
+            }
+
+            // === RULES TAB LOGIC (REWRITTEN) ===
+            function switchRuleTab(tab) {
+                // Update Buttons
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                const btns = document.querySelectorAll('.rules-tabs .tab-btn');
+                if(tab === 'basics' && btns[0]) btns[0].classList.add('active');
+                if(tab === 'actions' && btns[1]) btns[1].classList.add('active');
+                if(tab === 'scoring' && btns[2]) btns[2].classList.add('active');
+
+                // Update Content Visibility
+                const basicC = qs('#rule-basics');
+                const actionC = qs('#rule-actions');
+                const scoreC = qs('#rule-scoring'); // New container
+
+                if (basicC) basicC.style.display = tab === 'basics' ? 'block' : 'none';
+                if (actionC) actionC.style.display = tab === 'actions' ? 'block' : 'none';
+                if (scoreC) scoreC.style.display = tab === 'scoring' ? 'block' : 'none';
+
+                // Populate Content if empty
+                if (tab === 'actions' && actionC && actionC.innerHTML === '') {
+                     actionC.innerHTML = `
+                        <div class="premium-card" style="margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <strong style="color:#38bdf8;">❄️ FREEZE (3)</strong>
+                                <span style="font-size:10px; opacity:0.6;">OBBLIGATORIO</span>
+                            </div>
+                            <div style="font-size:12px; opacity:0.8; line-height:1.4;">
+                                Se rivelata, <strong>scegli un giocatore</strong>. Quel giocatore (anche tu se sei l'unico) DEVE fermarsi (Stay) immediatamente. Non può più pescare.
+                            </div>
+                        </div>
+                        <div class="premium-card" style="margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <strong style="color:#fbbf24;">⚡ FLIP 3 (3)</strong>
+                                <span style="font-size:10px; opacity:0.6;">RISCHIO</span>
+                            </div>
+                            <div style="font-size:12px; opacity:0.8; line-height:1.4;">
+                                <strong>Scegli un giocatore</strong>. Quel giocatore riceve 3 carte, rivelate UNA alla volta. Rischio bust alto! Se ottiene 7 numeri diversi durante Flip 3, vince subito il bonus!
+                            </div>
+                        </div>
+                        <div class="premium-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <strong style="color:#F43F5E;">❤️ SECOND CHANCE (3)</strong>
+                            </div>
+                            <div style="font-size:12px; opacity:0.8; line-height:1.4;">
+                                Ti protegge UNA VOLTA da un numero duplicato. Se peschi un doppione, scarta questa carta e il doppione. Continui a giocare. (Non protegge da Freeze!)
+                            </div>
+                        </div>
+                     `;
+                }
+                
+                if (tab === 'scoring' && scoreC && scoreC.innerHTML === '') {
+                     scoreC.innerHTML = `
+                        <div class="premium-card" style="margin-bottom:10px;">
+                             <div style="color:#22c55e; font-weight:bold; margin-bottom:5px;">🎉 BONUS FLIP 7 (+15 Punti)</div>
+                             <div style="font-size:12px; opacity:0.8;">
+                                 Ottieni esattamente <strong>7 carte NUMERO diverse</strong> (0-12).<br>
+                                 Il round termina SUBITO. Prendi 15 punti extra + la somma delle carte.
+                             </div>
+                        </div>
+                        <div class="premium-card" style="margin-bottom:10px;">
+                             <div style="color:#A78BFA; font-weight:bold; margin-bottom:5px;">✖️ MOLTIPLICATORE x2</div>
+                             <div style="font-size:12px; opacity:0.8;">
+                                 Raddoppia la somma delle sole Carte Numero. Le carte +2, +10 ecc. vengono aggiunte DOPO e non moltiplicate.
+                             </div>
+                        </div>
+                        <div class="premium-card">
+                             <div style="color:#818cf8; font-weight:bold; margin-bottom:5px;">➕ ADDIZIONI (+2, +10...)</div>
+                             <div style="font-size:12px; opacity:0.8;">
+                                 Si sommano al totale finale. Contano solo se NON sballi (Bust).
+                             </div>
+                        </div>
+                     `;
+                }
+            }
+
+            // Carousel Enhancement
+            function updateCarouselAnim(direction) {
+                const img = qs('#cbImage');
+                if(!img) return;
+                img.style.animation = 'none';
+                img.offsetHeight; 
+                img.style.animation = direction === 'next' ? 'slideInRight 0.3s ease, cardFloat 3s ease-in-out infinite' : 'slideInLeft 0.3s ease, cardFloat 3s ease-in-out infinite';
+            }
+            // FIX: Missing Modal Functions
+            window.switchRulesTab = function(tabId) {
+                // Update Buttons
+                document.querySelectorAll('.rules-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+                const btn = document.querySelector(`.rules-tabs .tab-btn[onclick="switchRulesTab('${tabId}')"]`);
+                if(btn) btn.classList.add('active');
+
+                // Update Body
+                document.querySelectorAll('.rules-section').forEach(s => s.style.display = 'none');
+                const section = document.getElementById(`tab-${tabId}`);
+                if(section) {
+                    section.style.display = 'block';
+                    section.classList.add('fade-in');
+                }
+            };
+
+            window.closeModal = function(id) {
+                const el = document.getElementById(id);
+                if(el) el.classList.remove('active');
+            };
+
+            // Hook into existing nextBack/prevBack
+            // We use a safe hook pattern
+            const originalNext = typeof nextBack === 'function' ? nextBack : null;
+            nextBack = function() { if(originalNext) originalNext(); updateCarouselAnim('next'); };
+            const originalPrev = typeof prevBack === 'function' ? prevBack : null;
+            prevBack = function() { if(originalPrev) originalPrev(); updateCarouselAnim('prev'); };
         </script>
         <div id="customToast"></div>
         <div id="recapOverlay"></div>
@@ -6716,117 +7359,189 @@
         </div>
         <!-- TUTORIAL MODAL -->
         <div class="modal" id="tutorialModal">
-            <div class="modal-content glass" style="max-width:500px; padding:0; overflow:hidden;">
-                <div style="background:linear-gradient(135deg, #A78BFA, #fbbf24); padding:20px; text-align:center;">
-                   <h2 style="margin:0; color:white; font-size:24px;">🎓 Tutorial Rapido</h2>
+            <div class="modal-content-premium">
+                <!-- Premium Header -->
+                <div class="modal-header-premium">
+                     <div style="font-size:60px; line-height:1; margin-bottom:10px;">🎓</div>
+                    <h2 class="premium-title" style="background: linear-gradient(to right, #A78BFA, #fbbf24); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Tutorial Rapido</h2>
+                    <div style="font-size:13px; color:rgba(255,255,255,0.5);">Impara a giocare in 30 secondi</div>
                 </div>
-                <div class="tutorial-slides" style="padding:25px; min-height:300px; display:flex; flex-direction:column; justify-content:center;">
-                    <!-- Slide 1 -->
-                    <div class="tut-slide active" id="tut-slide-1">
-                        <h3 style="color:#fbbf24;">👋 Benvenuto su Flip 7!</h3>
-                        <p style="margin:15px 0; line-height:1.6; opacity:0.9;">
-                            Flip 7 è un gioco di carte veloce e strategico.
-                            <br><br>
-                            L'obiettivo è ottenere punti sommando le carte, ma... 
-                            <strong>Attenzione a non sballare!</strong>
-                        </p>
-                        <div style="text-align:center; font-size:40px; margin-top:20px;">🃏</div>
-                    </div>
-                    <!-- Slide 2 -->
-                    <div class="tut-slide" id="tut-slide-2">
-                        <h3 style="color:#60a5fa;">🔢 Carte & Punteggio</h3>
-                        <p style="margin:15px 0; line-height:1.6; opacity:0.9;">
-                            • Carte <strong>0-12</strong>: Aggiungono il loro valore al punteggio.
-                            <br><br>
-                            • <strong>⚠️ REGOLA D'ORO</strong>: Se peschi un numero che hai già... 
-                            <span style="color:#ef4444; font-weight:bold;">SBALLI (BUST)!</span>
-                            Perdi tutti i punti del round.
-                        </p>
-                    </div>
-                    <!-- Slide 3 -->
-                    <div class="tut-slide" id="tut-slide-3">
-                        <h3 style="color:#A78BFA;">⚡ Azioni Speciali</h3>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; font-size:13px;">
-                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                                <div style="font-size:20px;">❄️</div>
-                                <strong>Freeze</strong><br>Blocca un avversario.
-                            </div>
-                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                                <div style="font-size:20px;">⚡</div>
-                                <strong>Flip 3</strong><br>Costringe a pescare 3 carte.
-                            </div>
-                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                                <div style="font-size:20px;">❤️</div>
-                                <strong>2nd Chance</strong><br>Ti salva se sballi.
-                            </div>
-                           <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
-                                <div style="font-size:20px;">🎉</div>
-                                <strong>Flip 7</strong><br>Fai 7 carte uniche = +15 Punti!
+
+                <div class="modal-body-premium">
+                    <!-- Slides Container -->
+                     <div class="tutorial-slides" style="min-height:300px; display:flex; flex-direction:column; justify-content:center;">
+                        <!-- Slide 1: Welcome -->
+                        <div class="tut-slide active" id="tut-slide-1">
+                            <div style="text-align:center; padding:10px;">
+                                <img src="assets/Flip7 Logo.webp" style="height:60px; margin-bottom:15px;">
+                                <h3 style="color:#fbbf24; margin-bottom:10px; font-size:22px;">Benvenuto su Flip 7!</h3>
+                                <p style="opacity:0.9; line-height:1.5; font-size:14px; margin-bottom:20px;">
+                                    Flip 7 è un gioco di rischio e fortuna.<br>
+                                    L'obiettivo è ottenere punti sommando le carte, ma...<br>
+                                    <strong>Attenzione a non sballare (BUST)!</strong>
+                                </p>
+                                <div class="premium-card" style="text-align:center; padding:15px;">
+                                    🎯 Vince chi arriva a <strong>200 Punti</strong>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Slide 4 -->
-                    <div class="tut-slide" id="tut-slide-4">
-                        <h3 style="color:#34d399;">🧠 Strategia</h3>
-                         <p style="margin:15px 0; line-height:1.6; opacity:0.9;">
-                            Devi decidere quando fermarti (<strong>Stay</strong>).
-                            <br><br>
-                            Meglio pochi punti sicuri o rischiare tutto per la vittoria?
-                            <br>
-                            Il primo a <strong>200 punti</strong> vince la partita! 🏆
-                        </p>
-                    </div>
+                        
+                        <!-- Slide 2: The Deck -->
+                        <div class="tut-slide" id="tut-slide-2">
+                             <h3 style="color:#60a5fa; text-align:center; margin-bottom:15px;">Il Mazzo</h3>
+                             <div class="premium-card" style="margin-bottom:10px;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                    <span style="font-size:20px;">🔢</span>
+                                    <strong>Carte Numero (0-12)</strong>
+                                </div>
+                                <div style="font-size:13px; opacity:0.8;">Il mazzo contiene una quantità di carte uguale al loro valore (dodici 12, due 2, uno 0).</div>
+                             </div>
+                             <div class="premium-card" style="border-color:#EF4444; background:rgba(239, 68, 68, 0.1);">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                    <span style="font-size:20px;">💣</span>
+                                    <strong style="color:#fca5a5;">REGOLA D'ORO</strong>
+                                </div>
+                                <div style="font-size:13px; opacity:0.9;">
+                                    Se peschi un numero che hai già davanti a te,<br>
+                                    <strong>SBALLI (0 Punti)</strong> e il tuo turno finisce!
+                                </div>
+                             </div>
+                        </div>
+                        
+                        <!-- Slide 3: Actions -->
+                        <div class="tut-slide" id="tut-slide-3">
+                             <h3 style="color:#A78BFA; text-align:center; margin-bottom:15px;">Azioni Speciali</h3>
+                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                 <div class="premium-card" style="text-align:center; padding:10px;">
+                                     <div style="font-size:24px;">❄️</div>
+                                     <div style="font-weight:700; font-size:12px; color:#38bdf8;">Freeze</div>
+                                     <div style="font-size:10px; opacity:0.7;">Congela un avversario (Stop!)</div>
+                                 </div>
+                                 <div class="premium-card" style="text-align:center; padding:10px;">
+                                     <div style="font-size:24px;">⚡</div>
+                                     <div style="font-weight:700; font-size:12px; color:#fbbf24;">Flip 3</div>
+                                     <div style="font-size:10px; opacity:0.7;">Pesca 3 carte extra!</div>
+                                 </div>
+                                 <div class="premium-card" style="text-align:center; padding:10px;">
+                                     <div style="font-size:24px;">❤️</div>
+                                     <div style="font-weight:700; font-size:12px; color:#F43F5E;">2nd Chance</div>
+                                     <div style="font-size:10px; opacity:0.7;">Salva dal primo BUST</div>
+                                 </div>
+                                 <div class="premium-card" style="text-align:center; padding:10px;">
+                                     <div style="font-size:24px;">✖️</div>
+                                     <div style="font-weight:700; font-size:12px; color:#818cf8;">Bonus</div>
+                                     <div style="font-size:10px; opacity:0.7;">x2, +10 (solo se non sballi)</div>
+                                 </div>
+                             </div>
+                        </div>
+
+                        <!-- Slide 4: Flip 7 -->
+                        <div class="tut-slide" id="tut-slide-4">
+                            <div style="text-align:center;">
+                                <div style="font-size:50px; margin-bottom:10px; animation:bounce 2s infinite;">🎉</div>
+                                <h3 style="background:linear-gradient(to right, #22c55e, #4ade80); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:28px; font-weight:800;">FLIP 7!</h3>
+                                <p style="margin:20px 0; font-size:15px; line-height:1.6;">
+                                    Se ottieni esattamente<br>
+                                    <strong>7 carte numero diverse</strong>...
+                                </p>
+                                <div class="premium-card" style="background:rgba(34, 197, 94, 0.1); border-color:#22c55e;">
+                                    ✅ Il round finisce subito<br>
+                                    ✅ Ottieni <strong>+15 Punti Bonus</strong>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
                 </div>
-                
-                <div style="padding:15px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between;">
-                    <button class="btn btn-secondary" onclick="prevTutSlide()" id="btnPrevTut">Indietro</button>
-                    <div style="display:flex; gap:5px; align-items:center;" id="tutDots"></div>
-                    <button class="btn" onclick="nextTutSlide()" id="btnNextTut">Avanti</button>
+
+                 <div style="display:flex; justify-content:center; gap:8px; margin-bottom:15px;" id="tutDots"></div>
+
+                <div style="padding:20px; text-align:center; border-top:1px solid rgba(255,255,255,0.05); display:flex; gap:10px;">
+                    <button class="btn btn-secondary" onclick="prevTutSlide()" id="btnPrevTut" style="flex:1;">Indietro</button>
+                    <button class="btn" onclick="nextTutSlide()" id="btnNextTut" style="flex:2;">Avanti</button>
                 </div>
-                <button onclick="qs('#tutorialModal').classList.remove('active')" style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+                <button onclick="qs('#tutorialModal').classList.remove('active')" style="position:absolute; top:15px; right:15px; width:30px; height:30px; border-radius:50%; background:rgba(0,0,0,0.3); color:white; border:none; cursor:pointer;">&times;</button>
             </div>
             <style>
-                .tut-slide { display:none; animation:fadeIn 0.3s; text-align:center; }
+                .tut-slide { display:none; animation:fadeIn 0.3s; }
                 .tut-slide.active { display:block; }
-                .tut-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.2); }
-                .tut-dot.active { background:white; }
             </style>
         </div>
 
         <!-- CREDITS MODAL -->
         <div class="modal" id="creditsModal">
-            <div class="modal-content glass" style="max-width:400px; text-align:center;">
-                <h2 style="margin-bottom:20px;">ℹ️ Crediti</h2>
-                <p style="line-height:1.8; opacity:0.9;">
-                    <strong>Idea originale Flip 7</strong><br>Eric Olsen
-                </p>
-                <div style="height:1px; background:rgba(255,255,255,0.1); margin:15px 0;"></div>
-                <p style="line-height:1.8; opacity:0.9;">
-                    <strong>Sviluppatore</strong><br>Simone Pepe
-                </p>
-                <div style="height:1px; background:rgba(255,255,255,0.1); margin:15px 0;"></div>
-                <p style="line-height:1.8; opacity:0.9; font-size:13px;">
-                    <strong>Risorse</strong><br>
-                    Asset suoni: Mixkit<br>
-                    Linguaggi: HTML, CSS, JS (Vanilla)
-                </p>
-                <button class="btn" style="width:100%; margin-top:25px;" onclick="qs('#creditsModal').classList.remove('active')">Chiudi</button>
-            </div>
-        </div>
-        <!-- EXIT MODAL -->
-        <div class="modal" id="exitModal">
-            <div class="modal-content glass" style="max-width:350px; text-align:center;">
-                <h2 style="margin-bottom:15px; color:#EF4444;">🚪 Esci dalla partita?</h2>
-                <p style="opacity:0.8; margin-bottom:25px; line-height:1.5;">
-                    Sei sicuro di voler abbandonare?<br>
-                    Perderai il posto nella stanza.
-                </p>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-secondary" onclick="qs('#exitModal').classList.remove('active')" style="flex:1;">Annulla</button>
-                    <button class="btn" onclick="window.location.hash=''; window.location.reload();" style="flex:1; background:#EF4444; box-shadow:0 4px 15px rgba(239, 68, 68, 0.4);">Sì, Esci</button>
+            <div class="modal-content glass" style="max-width:400px; padding:0; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <!-- Header -->
+                <div style="background:linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(251, 191, 36, 0.2)); padding:25px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <h2 style="margin:0; font-size:28px; background:linear-gradient(to right, #A78BFA, #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 10px rgba(167,139,250,0.3));">Flip 7</h2>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.5); letter-spacing:2px; margin-top:5px; text-transform:uppercase;">Web Experience</div>
+                </div>
+
+                <!-- Content -->
+                <div style="padding:25px; display:flex; flex-direction:column; gap:15px;">
+                    
+                    <!-- Dev Card -->
+                    <div style="background:rgba(255,255,255,0.03); border-radius:16px; padding:15px; display:flex; align-items:center; gap:15px; border:1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size:24px; background:rgba(255,255,255,0.1); width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;">👨‍💻</div>
+                        <div>
+                            <div style="font-size:11px; text-transform:uppercase; color:rgba(255,255,255,0.4); letter-spacing:1px; font-weight:700;">Sviluppo & Design</div>
+                            <div style="font-size:16px; font-weight:600; color:white;">Simone Pepe</div>
+                        </div>
+                    </div>
+
+                    <!-- Idea Card -->
+                    <div style="background:rgba(255,255,255,0.03); border-radius:16px; padding:15px; display:flex; align-items:center; gap:15px; border:1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size:24px; background:rgba(255,255,255,0.1); width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;">💡</div>
+                        <div>
+                            <div style="font-size:11px; text-transform:uppercase; color:rgba(255,255,255,0.4); letter-spacing:1px; font-weight:700;">Idea Originale</div>
+                            <div style="font-size:16px; font-weight:600; color:white;">Eric Olsen</div>
+                        </div>
+                    </div>
+
+                    <!-- Resources -->
+                     <div style="background:rgba(255,255,255,0.03); border-radius:16px; padding:15px; border:1px solid rgba(255,255,255,0.05);">
+                        <div style="font-size:11px; text-transform:uppercase; color:rgba(255,255,255,0.4); letter-spacing:1px; font-weight:700; margin-bottom:8px;">Tecnologie & Risorse</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="background:rgba(247, 223, 30, 0.1); color:#f7df1e; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">JavaScript</span>
+                            <span style="background:rgba(227, 76, 38, 0.1); color:#e34c26; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">HTML5</span>
+                            <span style="background:rgba(38, 77, 228, 0.1); color:#264de4; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">CSS3</span>
+                            <span style="background:rgba(255,255,255,0.1); color:white; padding:4px 8px; border-radius:6px; font-size:11px;">Howler.js</span>
+                            <span style="background:rgba(255,255,255,0.1); color:white; padding:4px 8px; border-radius:6px; font-size:11px;">PeerJS</span>
+                            <span style="background:rgba(255,255,255,0.1); color:white; padding:4px 8px; border-radius:6px; font-size:11px;">Chart.js</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                 <div style="padding:20px; text-align:center;">
+                    <button class="btn" style="width:100%; box-shadow:0 0 20px rgba(167, 139, 250, 0.3);" onclick="qs('#creditsModal').classList.remove('active')">Chiudi</button>
+                    <div style="margin-top:15px; font-size:10px; color:rgba(255,255,255,0.2);">
+                        Fatto con ❤️ in Italia
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- EXIT MODAL -->
+        <!-- EXIT MODAL -->
+        <div class="modal" id="exitModal">
+            <div class="modal-content-premium" style="max-width:380px;">
+                <div class="modal-header-premium">
+                    <div style="font-size:60px; line-height:1; margin-bottom:10px;">⚠️</div>
+                    <h2 class="premium-title" style="color:#EF4444; background:none; -webkit-text-fill-color: #EF4444;">Esci dalla partita?</h2>
+                    <div style="font-size:13px; color:rgba(255,255,255,0.5);">Perderai tutti i progressi</div>
+                </div>
+
+                <div class="modal-body-premium" style="text-align:center;">
+                    <p style="color:rgba(255,255,255,0.8); line-height:1.6;">Sei sicuro di voler abbandonare?<br>Se sei l'host, la stanza verrà chiusa per tutti.</p>
+                </div>
+                
+                <div style="padding:20px; display:flex; gap:10px;">
+                    <button class="btn btn-secondary" onclick="qs('#exitModal').classList.remove('active')" style="flex:1;">Resta</button>
+                    <button class="btn" onclick="window.location.hash=''; window.location.reload();" style="flex:1; background:linear-gradient(135deg, #EF4444, #b91c1c); box-shadow:0 4px 15px rgba(239, 68, 68, 0.4);">Sì, Esci</button>
+                </div>
+            </div>
+        </div>
+        <style>@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }</style>
 </body>
 
 </html>
