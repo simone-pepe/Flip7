@@ -1,6 +1,8 @@
 # 🃏 Flip 7 - The Web Game
 
-![Flip 7 Logo](assets/Flip7%20Logo.webp)
+<p align="center">
+  <img src="assets/Flip7%20Logo.webp" alt="Flip 7 Logo" width="220">
+</p>
 
 **Flip 7** è un gioco di carte strategico multiplayer "push-your-luck", sviluppato come Web App moderna (PWA). Sfida i tuoi amici in tempo reale o gioca contro l'IA, ovunque tu sia!
 
